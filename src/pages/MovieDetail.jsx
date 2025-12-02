@@ -8,6 +8,7 @@ import {
   Spinner,
   Alert,
   Button,
+  ListGroup,
 } from "react-bootstrap";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -16,20 +17,83 @@ function MovieDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [movie, setMovie] = useState(null);
+  const [cast, setCast] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     setLoading(true);
-    fetch(`http://localhost:5079/api/Movies/${id}`)
-      .then((response) => {
-        if (!response.ok) {
+
+    // Fetch both movie details and cast in parallel
+    Promise.all([
+      fetch(`http://localhost:5079/api/Movies/${id}`),
+      fetch(`http://localhost:5079/api/Movies/${id}/cast`),
+    ])
+      .then(([movieRes, castRes]) => {
+        if (!movieRes.ok) {
           throw new Error("Failed to fetch movie details");
         }
-        return response.json();
+        if (!castRes.ok) {
+          throw new Error("Failed to fetch cast");
+        }
+        return Promise.all([movieRes.json(), castRes.json()]);
       })
-      .then((data) => {
-        setMovie(data);
+      .then(([movieData, castData]) => {
+        setMovie(movieData);
+        const rawCast = Array.isArray(castData)
+          ? castData
+          : castData.cast || castData.data || [];
+
+        // Consolidate cast by nconst
+        const castMap = new Map();
+        rawCast.forEach((member) => {
+          const key = member.nconst;
+          if (castMap.has(key)) {
+            const existing = castMap.get(key);
+            // Collect all character names
+            if (member.characterName && member.characterName.trim()) {
+              existing.characterNames.push(member.characterName);
+            }
+            // Collect all jobs
+            if (member.job && member.job.trim()) {
+              existing.jobs.add(member.job.trim());
+            }
+          } else {
+            castMap.set(key, {
+              nconst: member.nconst,
+              name: member.name,
+              primaryName: member.primaryName,
+              characterNames:
+                member.characterName && member.characterName.trim()
+                  ? [member.characterName]
+                  : [],
+              jobs: new Set(
+                member.job && member.job.trim() ? [member.job.trim()] : []
+              ),
+              category: member.category,
+            });
+          }
+        });
+
+        // Convert to array and process character names
+        const consolidatedCast = Array.from(castMap.values()).map((member) => ({
+          ...member,
+          allCharacters: member.characterNames
+            .map((char) =>
+              char
+                .replace(/^\[|\]$/g, "")
+                .replace(/'/g, "")
+                .split(",")
+                .map((c) => c.trim())
+                .filter((c) => c)
+            )
+            .flat()
+            .filter((char, idx, arr) => arr.indexOf(char) === idx) // Remove duplicates
+            .join(", "),
+          allJobs: Array.from(member.jobs).join(", "),
+        }));
+
+        setCast(consolidatedCast);
         setLoading(false);
       })
       .catch((err) => {
@@ -134,6 +198,61 @@ function MovieDetail() {
             </Card>
           </Col>
         </Row>
+
+        {cast.length > 0 && (
+          <Row className="mt-4">
+            <Col>
+              <h4 className="mb-3">Cast</h4>
+              <Row xs={2} md={3} lg={6} className="g-3">
+                {cast.slice(0, 12).map((member, index) => (
+                  <Col key={index}>
+                    <Card className="h-100">
+                      <div
+                        style={{
+                          backgroundColor: "#e0e0e0",
+                          height: "180px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <span className="text-muted">No Photo</span>
+                      </div>
+                      <Card.Body className="p-2">
+                        <Card.Title
+                          style={{
+                            fontSize: "0.9rem",
+                            marginBottom: "0.25rem",
+                          }}
+                        >
+                          {member.primaryName || member.name}
+                        </Card.Title>
+                        <Card.Text
+                          style={{ fontSize: "0.8rem" }}
+                          className="text-muted mb-0"
+                        >
+                          {member.allCharacters && (
+                            <div>
+                              <strong>Roles:</strong> {member.allCharacters}
+                            </div>
+                          )}
+                          {member.allJobs && (
+                            <div>
+                              <strong>Job:</strong> {member.allJobs}
+                            </div>
+                          )}
+                          {!member.allCharacters &&
+                            !member.allJobs &&
+                            member.category && <div>{member.category}</div>}
+                        </Card.Text>
+                      </Card.Body>
+                    </Card>
+                  </Col>
+                ))}
+              </Row>
+            </Col>
+          </Row>
+        )}
       </Container>
       <Footer />
     </div>
