@@ -6,6 +6,7 @@ import "./index.css";
 import App from "./App.jsx";
 import MovieDetail from "./pages/MovieDetail.jsx";
 import SeriesDetail from "./pages/SeriesDetail.jsx";
+import PersonDetail from "./pages/PersonDetail.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -14,6 +15,7 @@ createRoot(document.getElementById("root")).render(
         <Route path="/" element={<App />} />
         <Route path="/movie/:id" element={<MovieDetail />} />
         <Route path="/series/:id" element={<SeriesDetail />} />
+        <Route path="/person/:id" element={<PersonDetail />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>

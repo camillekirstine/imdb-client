@@ -20,6 +20,7 @@ function MovieDetail() {
   const [cast, setCast] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const apiKey = "e4f70d8185101e89d6853659d9cfd53b";
 
   useEffect(() => {
     setLoading(true);
@@ -31,12 +32,26 @@ function MovieDetail() {
     ])
       .then(([movieRes, castRes]) => {
         if (!movieRes.ok) {
-          throw new Error("Failed to fetch movie details");
+          return movieRes
+            .json()
+            .then((data) => {
+              throw new Error(data.message || "Failed to fetch movie details");
+            })
+            .catch((err) => {
+              if (
+                err.message &&
+                err.message !== "Failed to fetch movie details"
+              ) {
+                throw err;
+              }
+              throw new Error("Failed to fetch movie details");
+            });
         }
-        if (!castRes.ok) {
-          throw new Error("Failed to fetch cast");
-        }
-        return Promise.all([movieRes.json(), castRes.json()]);
+
+        const moviePromise = movieRes.json();
+        const castPromise = castRes.ok ? castRes.json() : Promise.resolve([]);
+
+        return Promise.all([moviePromise, castPromise]);
       })
       .then(([movieData, castData]) => {
         setMovie(movieData);
@@ -93,7 +108,30 @@ function MovieDetail() {
           allJobs: Array.from(member.jobs).join(", "),
         }));
 
-        setCast(consolidatedCast);
+        // Fetch TMDB photos for each cast member
+        const photoPromises = consolidatedCast.map((member) =>
+          fetch(
+            `https://api.themoviedb.org/3/search/person?api_key=${apiKey}&query=${encodeURIComponent(
+              member.name
+            )}`
+          )
+            .then((res) => res.json())
+            .then((data) => {
+              if (data.results && data.results.length > 0) {
+                return {
+                  ...member,
+                  profile_path: data.results[0].profile_path,
+                };
+              }
+              return member;
+            })
+            .catch(() => member)
+        );
+
+        return Promise.all(photoPromises);
+      })
+      .then((castWithPhotos) => {
+        setCast(castWithPhotos);
         setLoading(false);
       })
       .catch((err) => {
@@ -133,7 +171,13 @@ function MovieDetail() {
 
   return (
     <div className="d-flex flex-column min-vh-100">
-      <Navbar pageName="Movie Details" />
+      <Navbar
+        pageName={
+          movie?.titleType === "tvSeries" || movie?.titleType === "tvMiniSeries"
+            ? "Series Details"
+            : "Movie Details"
+        }
+      />
       <Container fluid className="flex-grow-1 py-4 px-5">
         <Button
           variant="secondary"
@@ -158,7 +202,25 @@ function MovieDetail() {
             </div>
           </Col>
           <Col md={8}>
-            <h1>{movie.title || movie.primaryTitle}</h1>
+            <h1>
+              {movie.title || movie.primaryTitle}
+              {movie.startYear && (
+                <span
+                  className="text-muted"
+                  style={{ fontSize: "1.5rem", marginLeft: "0.5rem" }}
+                >
+                  ({movie.startYear})
+                </span>
+              )}
+            </h1>
+            {movie.runtimeMinutes && (
+              <p className="text-muted mb-3">
+                Runtime: {movie.runtimeMinutes} minutes
+                {movie.isAdult && (
+                  <span className="badge bg-danger ms-2">Adult Content</span>
+                )}
+              </p>
+            )}
             <Card className="mt-3">
               <Card.Body>
                 <h5>Movie Information</h5>
@@ -206,18 +268,34 @@ function MovieDetail() {
               <Row xs={2} md={3} lg={6} className="g-3">
                 {cast.slice(0, 12).map((member, index) => (
                   <Col key={index}>
-                    <Card className="h-100">
-                      <div
-                        style={{
-                          backgroundColor: "#e0e0e0",
-                          height: "180px",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
-                      >
-                        <span className="text-muted">No Photo</span>
-                      </div>
+                    <Card
+                      className="h-100"
+                      onClick={() => navigate(`/person/${member.nconst}`)}
+                      style={{ cursor: "pointer" }}
+                    >
+                      {member.profile_path ? (
+                        <Card.Img
+                          variant="top"
+                          src={`https://image.tmdb.org/t/p/w185${member.profile_path}`}
+                          alt={member.primaryName || member.name}
+                          style={{
+                            height: "180px",
+                            objectFit: "cover",
+                          }}
+                        />
+                      ) : (
+                        <div
+                          style={{
+                            backgroundColor: "#e0e0e0",
+                            height: "180px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <span className="text-muted">No Photo</span>
+                        </div>
+                      )}
                       <Card.Body className="p-2">
                         <Card.Title
                           style={{
@@ -227,7 +305,7 @@ function MovieDetail() {
                         >
                           {member.primaryName || member.name}
                         </Card.Title>
-                        <Card.Text
+                        <div
                           style={{ fontSize: "0.8rem" }}
                           className="text-muted mb-0"
                         >
@@ -244,7 +322,7 @@ function MovieDetail() {
                           {!member.allCharacters &&
                             !member.allJobs &&
                             member.category && <div>{member.category}</div>}
-                        </Card.Text>
+                        </div>
                       </Card.Body>
                     </Card>
                   </Col>

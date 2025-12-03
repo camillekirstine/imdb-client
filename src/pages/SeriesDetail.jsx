@@ -20,6 +20,7 @@ function SeriesDetail() {
   const [cast, setCast] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const apiKey = "e4f70d8185101e89d6853659d9cfd53b";
 
   useEffect(() => {
     setLoading(true);
@@ -31,12 +32,26 @@ function SeriesDetail() {
     ])
       .then(([seriesRes, castRes]) => {
         if (!seriesRes.ok) {
-          throw new Error("Failed to fetch series details");
+          return seriesRes
+            .json()
+            .then((data) => {
+              throw new Error(data.message || "Failed to fetch series details");
+            })
+            .catch((err) => {
+              if (
+                err.message &&
+                err.message !== "Failed to fetch series details"
+              ) {
+                throw err;
+              }
+              throw new Error("Failed to fetch series details");
+            });
         }
-        if (!castRes.ok) {
-          throw new Error("Failed to fetch cast");
-        }
-        return Promise.all([seriesRes.json(), castRes.json()]);
+
+        const seriesPromise = seriesRes.json();
+        const castPromise = castRes.ok ? castRes.json() : Promise.resolve([]);
+
+        return Promise.all([seriesPromise, castPromise]);
       })
       .then(([seriesData, castData]) => {
         setSeries(seriesData);
@@ -93,7 +108,30 @@ function SeriesDetail() {
           allJobs: Array.from(member.jobs).join(", "),
         }));
 
-        setCast(consolidatedCast);
+        // Fetch TMDB photos for each cast member
+        const photoPromises = consolidatedCast.map((member) =>
+          fetch(
+            `https://api.themoviedb.org/3/search/person?api_key=${apiKey}&query=${encodeURIComponent(
+              member.name
+            )}`
+          )
+            .then((res) => res.json())
+            .then((data) => {
+              if (data.results && data.results.length > 0) {
+                return {
+                  ...member,
+                  profile_path: data.results[0].profile_path,
+                };
+              }
+              return member;
+            })
+            .catch(() => member)
+        );
+
+        return Promise.all(photoPromises);
+      })
+      .then((castWithPhotos) => {
+        setCast(castWithPhotos);
         setLoading(false);
       })
       .catch((err) => {
@@ -133,7 +171,11 @@ function SeriesDetail() {
 
   return (
     <div className="d-flex flex-column min-vh-100">
-      <Navbar pageName="Series Details" />
+      <Navbar
+        pageName={
+          series?.titleType === "movie" ? "Movie Details" : "Series Details"
+        }
+      />
       <Container fluid className="flex-grow-1 py-4 px-5">
         <Button
           variant="secondary"
@@ -221,18 +263,34 @@ function SeriesDetail() {
               <Row xs={2} md={3} lg={6} className="g-3">
                 {cast.slice(0, 12).map((member, index) => (
                   <Col key={index}>
-                    <Card className="h-100">
-                      <div
-                        style={{
-                          backgroundColor: "#e0e0e0",
-                          height: "180px",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
-                      >
-                        <span className="text-muted">No Photo</span>
-                      </div>
+                    <Card
+                      className="h-100"
+                      onClick={() => navigate(`/person/${member.nconst}`)}
+                      style={{ cursor: "pointer" }}
+                    >
+                      {member.profile_path ? (
+                        <Card.Img
+                          variant="top"
+                          src={`https://image.tmdb.org/t/p/w185${member.profile_path}`}
+                          alt={member.primaryName || member.name}
+                          style={{
+                            height: "180px",
+                            objectFit: "cover",
+                          }}
+                        />
+                      ) : (
+                        <div
+                          style={{
+                            backgroundColor: "#e0e0e0",
+                            height: "180px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <span className="text-muted">No Photo</span>
+                        </div>
+                      )}
                       <Card.Body className="p-2">
                         <Card.Title
                           style={{
@@ -242,7 +300,7 @@ function SeriesDetail() {
                         >
                           {member.primaryName || member.name}
                         </Card.Title>
-                        <Card.Text
+                        <div
                           style={{ fontSize: "0.8rem" }}
                           className="text-muted mb-0"
                         >
@@ -259,7 +317,7 @@ function SeriesDetail() {
                           {!member.allCharacters &&
                             !member.allJobs &&
                             member.category && <div>{member.category}</div>}
-                        </Card.Text>
+                        </div>
                       </Card.Body>
                     </Card>
                   </Col>
