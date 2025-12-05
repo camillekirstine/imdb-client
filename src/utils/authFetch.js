@@ -24,7 +24,7 @@ export async function authFetch(url, options = {}) {
     localStorage.removeItem("authToken");
     localStorage.removeItem("user");
     window.location.href = "/user/login?expired=true";
-    throw new Error("Authentication expired. Please log in again.");
+    return;
   }
 
   return response;
