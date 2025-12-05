@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { authFetch } from "../utils/authFetch";
 import {
   Container,
   Row,
@@ -10,6 +11,7 @@ import {
   Button,
   Modal,
 } from "react-bootstrap";
+import { BookmarkPlus, BookmarkCheckFill } from "react-bootstrap-icons";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
@@ -24,6 +26,9 @@ function PersonDetail() {
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [bookmarkId, setBookmarkId] = useState(null);
   const apiKey = "e4f70d8185101e89d6853659d9cfd53b";
 
   const handleImageClick = (image) => {
@@ -50,6 +55,93 @@ function PersonDetail() {
     );
     const prevIndex = (currentIndex - 1 + images.length) % images.length;
     setSelectedImage(images[prevIndex]);
+  };
+
+  useEffect(() => {
+    const token = localStorage.getItem("authToken");
+    setIsLoggedIn(!!token);
+  }, []);
+
+  const handleAddBookmark = async () => {
+    const token = localStorage.getItem("authToken");
+
+    if (!token) {
+      navigate("/user/login");
+      return;
+    }
+
+    const userData = localStorage.getItem("user");
+    let userId = 0;
+
+    if (userData) {
+      try {
+        const user = JSON.parse(userData);
+        userId = user.id || user.userId || 0;
+      } catch (e) {
+        console.error("Failed to parse user data:", e);
+      }
+    }
+
+    try {
+      const response = await authFetch("http://localhost:5079/api/Bookmarks", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: userId,
+          tconst: null,
+          nconst: id,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setIsBookmarked(true);
+        setBookmarkId(data.id || data.bookmarkId);
+      } else {
+        const errorData = await response.json();
+        console.error("Failed to add bookmark:", errorData);
+      }
+    } catch (err) {
+      console.error("Failed to add bookmark:", err);
+    }
+  };
+
+  const handleRemoveBookmark = async () => {
+    const token = localStorage.getItem("authToken");
+
+    if (!token) {
+      navigate("/user/login");
+      return;
+    }
+
+    if (!bookmarkId) {
+      console.error("No bookmark ID available");
+      return;
+    }
+
+    try {
+      const response = await authFetch(
+        `http://localhost:5079/api/Bookmarks/${bookmarkId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.ok) {
+        setIsBookmarked(false);
+        setBookmarkId(null);
+      } else {
+        const errorData = await response.json();
+        console.error("Failed to remove bookmark:", errorData);
+      }
+    } catch (err) {
+      console.error("Failed to remove bookmark:", err);
+    }
   };
 
   useEffect(() => {
@@ -209,12 +301,37 @@ function PersonDetail() {
             )}
           </Col>
           <Col md={8}>
-            <h1>{person.primaryName || person.name}</h1>
-            {person.primaryProfession && (
-              <p className="text-muted mb-3" style={{ fontSize: "1.2rem" }}>
-                {person.primaryProfession}
-              </p>
-            )}
+            <div className="d-flex justify-content-between align-items-start mb-3">
+              <div>
+                <h1>{person.primaryName || person.name}</h1>
+                {person.primaryProfession && (
+                  <p className="text-muted mb-0" style={{ fontSize: "1.2rem" }}>
+                    {person.primaryProfession}
+                  </p>
+                )}
+              </div>
+              {isLoggedIn && (
+                <Button
+                  variant={isBookmarked ? "success" : "primary"}
+                  onClick={
+                    isBookmarked ? handleRemoveBookmark : handleAddBookmark
+                  }
+                  className="d-flex align-items-center gap-2"
+                >
+                  {isBookmarked ? (
+                    <>
+                      <BookmarkCheckFill />
+                      Bookmarked
+                    </>
+                  ) : (
+                    <>
+                      <BookmarkPlus />
+                      Add to Bookmarks
+                    </>
+                  )}
+                </Button>
+              )}
+            </div>
             <Card className="mt-3">
               <Card.Body>
                 <h5>Person Information</h5>

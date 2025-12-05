@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { authFetch } from "../utils/authFetch";
 import {
   Container,
   Row,
@@ -23,6 +24,7 @@ function SeriesDetail() {
   const [error, setError] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isInWatchlist, setIsInWatchlist] = useState(false);
+  const [bookmarkId, setBookmarkId] = useState(null);
   const apiKey = "e4f70d8185101e89d6853659d9cfd53b";
 
   useEffect(() => {
@@ -51,11 +53,10 @@ function SeriesDetail() {
     }
 
     try {
-      const response = await fetch("http://localhost:5079/api/Bookmarks", {
+      const response = await authFetch("http://localhost:5079/api/Bookmarks", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           userId: userId,
@@ -65,13 +66,51 @@ function SeriesDetail() {
       });
 
       if (response.ok) {
+        const data = await response.json();
         setIsInWatchlist(true);
+        setBookmarkId(data.id || data.bookmarkId);
       } else {
         const errorData = await response.json();
         console.error("Failed to add bookmark:", errorData);
       }
     } catch (err) {
       console.error("Failed to add to watchlist:", err);
+    }
+  };
+
+  const handleRemoveFromWatchlist = async () => {
+    const token = localStorage.getItem("authToken");
+
+    if (!token) {
+      navigate("/user/login");
+      return;
+    }
+
+    if (!bookmarkId) {
+      console.error("No bookmark ID available");
+      return;
+    }
+
+    try {
+      const response = await authFetch(
+        `http://localhost:5079/api/Bookmarks/${bookmarkId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.ok) {
+        setIsInWatchlist(false);
+        setBookmarkId(null);
+      } else {
+        const errorData = await response.json();
+        console.error("Failed to remove bookmark:", errorData);
+      }
+    } catch (err) {
+      console.error("Failed to remove from watchlist:", err);
     }
   };
 
@@ -270,13 +309,16 @@ function SeriesDetail() {
                 <Button
                   variant={isInWatchlist ? "success" : "outline-primary"}
                   className="ms-3"
-                  onClick={handleAddToWatchlist}
-                  disabled={isInWatchlist}
+                  onClick={
+                    isInWatchlist
+                      ? handleRemoveFromWatchlist
+                      : handleAddToWatchlist
+                  }
                 >
                   {isInWatchlist ? (
                     <>
                       <BookmarkCheckFill className="me-2" />
-                      In Watchlist
+                      Remove from Watchlist
                     </>
                   ) : (
                     <>

@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Container, Form, Button, Card, Alert } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
 function UserLogIn() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [formData, setFormData] = useState({
     username: "",
     password: "",
@@ -13,6 +14,18 @@ function UserLogIn() {
   const [fieldErrors, setFieldErrors] = useState({});
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [sessionExpired, setSessionExpired] = useState(false);
+
+  useEffect(() => {
+    // Check if redirected due to expired session
+    if (searchParams.get("expired") === "true") {
+      setSessionExpired(true);
+      // Clear the URL parameter
+      const newSearchParams = new URLSearchParams(searchParams);
+      newSearchParams.delete("expired");
+      navigate({ search: newSearchParams.toString() }, { replace: true });
+    }
+  }, [searchParams, navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -106,6 +119,19 @@ function UserLogIn() {
             <Card>
               <Card.Body className="p-4">
                 <h2 className="text-center mb-4">Log In</h2>
+
+                {sessionExpired && (
+                  <Alert
+                    variant="warning"
+                    dismissible
+                    onClose={() => setSessionExpired(false)}
+                  >
+                    <strong>Session Expired</strong>
+                    <p className="mb-0">
+                      Your session has expired. Please log in again to continue.
+                    </p>
+                  </Alert>
+                )}
 
                 {error && <Alert variant="danger">{error}</Alert>}
 
