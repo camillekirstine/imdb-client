@@ -6,7 +6,9 @@ import "./index.css";
 import App from "./App.jsx";
 import MovieDetail from "./pages/MovieDetail.jsx";
 import SeriesDetail from "./pages/SeriesDetail.jsx";
+import EpisodeDetail from "./pages/EpisodeDetail.jsx";
 import PersonDetail from "./pages/PersonDetail.jsx";
+import SearchResults from "./pages/SearchResults.jsx";
 import UserProfile from "./pages/UserProfile.jsx";
 import UserProfileDetails from "./pages/UserProfileDetails.jsx";
 import UserRatings from "./pages/UserRatings.jsx";
@@ -20,8 +22,10 @@ createRoot(document.getElementById("root")).render(
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<App />} />
+        <Route path="/search" element={<SearchResults />} />
         <Route path="/movie/:id" element={<MovieDetail />} />
         <Route path="/series/:id" element={<SeriesDetail />} />
+        <Route path="/episode/:id" element={<EpisodeDetail />} />
         <Route path="/person/:id" element={<PersonDetail />} />
         <Route path="/user" element={<UserProfile />}>
           <Route index element={<UserProfileDetails />} />

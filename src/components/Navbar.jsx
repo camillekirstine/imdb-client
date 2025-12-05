@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Navbar as BsNavbar,
   Container,
@@ -8,9 +9,11 @@ import {
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { PersonCircle } from "react-bootstrap-icons";
+import { authFetch } from "../utils/authFetch";
 
 function Navbar({ breadcrumbs }) {
   const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleUserIconClick = () => {
     const token = localStorage.getItem("authToken");
@@ -18,6 +21,41 @@ function Navbar({ breadcrumbs }) {
       navigate("/user");
     } else {
       navigate("/user/login");
+    }
+  };
+
+  const handleSearchSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!searchQuery.trim()) return;
+
+    const token = localStorage.getItem("authToken");
+    
+    try {
+      let results = [];
+      
+      if (token) {
+        // Logged-in user: use structured search
+        const response = await authFetch(
+          `http://localhost:5079/api/search/structured?query=${encodeURIComponent(searchQuery)}`
+        );
+        if (response.ok) {
+          results = await response.json();
+        }
+      } else {
+        // Anonymous user: use best-match search
+        const response = await fetch(
+          `http://localhost:5079/api/search/best-match?query=${encodeURIComponent(searchQuery)}`
+        );
+        if (response.ok) {
+          results = await response.json();
+        }
+      }
+      
+      // Navigate to search results page with results
+      navigate("/search", { state: { query: searchQuery, results } });
+    } catch (err) {
+      console.error("Search failed:", err);
     }
   };
 
@@ -44,12 +82,15 @@ function Navbar({ breadcrumbs }) {
           <Form
             className="d-flex mx-auto"
             style={{ maxWidth: "500px", flex: 1 }}
+            onSubmit={handleSearchSubmit}
           >
             <FormControl
               type="search"
               placeholder="Search IMDb"
               className="me-2"
               aria-label="Search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
           </Form>
 
