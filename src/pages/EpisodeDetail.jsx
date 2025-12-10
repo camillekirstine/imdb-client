@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { authFetch } from "../utils/authFetch";
 import {
   Container,
@@ -17,6 +17,7 @@ import Footer from "../components/Footer";
 function EpisodeDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [episode, setEpisode] = useState(null);
   const [cast, setCast] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -24,6 +25,8 @@ function EpisodeDetail() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isInWatchlist, setIsInWatchlist] = useState(false);
   const [bookmarkId, setBookmarkId] = useState(null);
+  const [userNote, setUserNote] = useState(null);
+  const [userRating, setUserRating] = useState(null);
   const apiKey = "e4f70d8185101e89d6853659d9cfd53b";
 
   useEffect(() => {
@@ -116,8 +119,8 @@ function EpisodeDetail() {
   useEffect(() => {
     // Fetch episode details and cast in parallel
     Promise.all([
-      fetch(`http://localhost:5079/api/Movies/${id}`),
-      fetch(`http://localhost:5079/api/Movies/${id}/cast`),
+      authFetch(`http://localhost:5079/api/Movies/${id}`),
+      authFetch(`http://localhost:5079/api/Movies/${id}/cast`),
     ])
       .then(([episodeRes, castRes]) => {
         if (!episodeRes.ok) {
@@ -140,6 +143,16 @@ function EpisodeDetail() {
       })
       .then(([episodeData, castData]) => {
         setEpisode(episodeData);
+
+        // Set bookmark status from location.state (if navigating from bookmarks) or API response
+        const bookmarkData =
+          location.state?.userBookmark || episodeData.userBookmark;
+        if (bookmarkData) {
+          setIsInWatchlist(true);
+          setBookmarkId(bookmarkData.bookmarkId);
+          setUserNote(bookmarkData.note);
+          setUserRating(bookmarkData.rating);
+        }
 
         // Process cast data with TMDB photos
         const castArray = Array.isArray(castData)
@@ -216,7 +229,7 @@ function EpisodeDetail() {
         ]
       : []),
     {
-      label: episode?.episodeTitle || "Episode",
+      label: location.state?.episodeTitle || episode?.episodeTitle || "Episode",
       active: true,
     },
   ];
@@ -306,7 +319,7 @@ function EpisodeDetail() {
                     {episode.parentSeriesTitle}
                   </h5>
                 )}
-                <h1>{episode.episodeTitle}</h1>
+                <h1>{location.state?.episodeTitle || episode.episodeTitle}</h1>
                 <p className="text-muted mb-0" style={{ fontSize: "1.1rem" }}>
                   {episode.seasonNumber && episode.episodeNumber && (
                     <span>
@@ -352,7 +365,19 @@ function EpisodeDetail() {
 
             <Card className="mt-3">
               <Card.Body>
-                <h5>Episode Information</h5>
+                <h5>Details</h5>
+                {episode.titleType && (
+                  <p>
+                    <strong>Type:</strong>{" "}
+                    <span className="text-capitalize">{episode.titleType}</span>
+                  </p>
+                )}
+                {episode.originalTitle &&
+                  episode.originalTitle !== episode.episodeTitle && (
+                    <p>
+                      <strong>Original Title:</strong> {episode.originalTitle}
+                    </p>
+                  )}
                 {episode.parentSeriesTitle && (
                   <p>
                     <strong>Series:</strong> {episode.parentSeriesTitle}
@@ -401,6 +426,24 @@ function EpisodeDetail() {
                 {episode.writerNames && (
                   <p>
                     <strong>Writers:</strong> {episode.writerNames}
+                  </p>
+                )}
+                {episode.language && (
+                  <p>
+                    <strong>Language:</strong> {episode.language}
+                  </p>
+                )}
+                {episode.country && (
+                  <p>
+                    <strong>Country:</strong> {episode.country}
+                  </p>
+                )}
+                {episode.genres && (
+                  <p>
+                    <strong>Genres:</strong>{" "}
+                    {Array.isArray(episode.genres)
+                      ? episode.genres.join(", ")
+                      : episode.genres}
                   </p>
                 )}
                 {episode.plot && (

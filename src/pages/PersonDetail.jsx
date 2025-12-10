@@ -29,6 +29,8 @@ function PersonDetail() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [bookmarkId, setBookmarkId] = useState(null);
+  const [userNote, setUserNote] = useState(null);
+  const [userRating, setUserRating] = useState(null);
   const apiKey = "e4f70d8185101e89d6853659d9cfd53b";
 
   const handleImageClick = (image) => {
@@ -149,8 +151,8 @@ function PersonDetail() {
 
     // Fetch person details and filmography in parallel
     Promise.all([
-      fetch(`http://localhost:5079/api/Person/${id}`),
-      fetch(`http://localhost:5079/api/Person/${id}/filmography`),
+      authFetch(`http://localhost:5079/api/Person/${id}`),
+      authFetch(`http://localhost:5079/api/Person/${id}/filmography`),
     ])
       .then(([personRes, filmRes]) => {
         if (!personRes.ok) {
@@ -171,6 +173,17 @@ function PersonDetail() {
       })
       .then(([personData, filmData]) => {
         setPerson(personData);
+
+        // Set bookmark status from location.state (if navigating from bookmarks) or API response
+        const bookmarkData =
+          location.state?.userBookmark || personData.userBookmark;
+        if (bookmarkData) {
+          setIsBookmarked(true);
+          setBookmarkId(bookmarkData.bookmarkId);
+          setUserNote(bookmarkData.note);
+          setUserRating(bookmarkData.rating);
+        }
+
         setFilmography(
           Array.isArray(filmData) ? filmData : filmData.filmography || []
         );

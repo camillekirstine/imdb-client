@@ -113,9 +113,47 @@ function UserBookmarks() {
         bookmark.titleType === "tvSeries" ||
         bookmark.titleType === "tvMiniSeries" ||
         bookmark.titleType === "tvEpisode";
-      navigate(`/${isSeries ? "series" : "movie"}/${bookmark.tconst}`);
+      const isEpisode = bookmark.titleType === "tvEpisode";
+      const route = isEpisode ? "episode" : isSeries ? "series" : "movie";
+
+      navigate(`/${route}/${bookmark.tconst}`, {
+        state: {
+          from: {
+            label: "My Bookmarks",
+            path: "/user/bookmarks",
+          },
+          ...(isSeries && !isEpisode
+            ? { seriesTitle: bookmark.title || bookmark.primaryTitle }
+            : {}),
+          ...(isEpisode
+            ? { episodeTitle: bookmark.title || bookmark.primaryTitle }
+            : {}),
+          ...(!isSeries && !isEpisode
+            ? { movieTitle: bookmark.title || bookmark.primaryTitle }
+            : {}),
+          userBookmark: {
+            bookmarkId: bookmark.bookmarkId,
+            note: bookmark.note,
+            rating: bookmark.rating,
+            isBookmarked: true,
+          },
+        },
+      });
     } else if (bookmark.nconst) {
-      navigate(`/person/${bookmark.nconst}`);
+      navigate(`/person/${bookmark.nconst}`, {
+        state: {
+          from: {
+            label: "My Bookmarks",
+            path: "/user/bookmarks",
+          },
+          userBookmark: {
+            bookmarkId: bookmark.bookmarkId,
+            note: bookmark.note,
+            rating: bookmark.rating,
+            isBookmarked: true,
+          },
+        },
+      });
     }
   };
 

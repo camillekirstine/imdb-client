@@ -26,6 +26,8 @@ function SeriesDetail() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isInWatchlist, setIsInWatchlist] = useState(false);
   const [bookmarkId, setBookmarkId] = useState(null);
+  const [userNote, setUserNote] = useState(null);
+  const [userRating, setUserRating] = useState(null);
   const apiKey = "e4f70d8185101e89d6853659d9cfd53b";
 
   useEffect(() => {
@@ -120,8 +122,8 @@ function SeriesDetail() {
 
     // Fetch both series details and cast in parallel
     Promise.all([
-      fetch(`http://localhost:5079/api/Movies/${id}`),
-      fetch(`http://localhost:5079/api/Movies/${id}/cast`),
+      authFetch(`http://localhost:5079/api/Movies/${id}`),
+      authFetch(`http://localhost:5079/api/Movies/${id}/cast`),
     ])
       .then(([seriesRes, castRes]) => {
         if (!seriesRes.ok) {
@@ -155,6 +157,17 @@ function SeriesDetail() {
         }
 
         setSeries(seriesData);
+
+        // Set bookmark status from location.state (if navigating from bookmarks) or API response
+        const bookmarkData =
+          location.state?.userBookmark || seriesData.userBookmark;
+        if (bookmarkData) {
+          setIsInWatchlist(true);
+          setBookmarkId(bookmarkData.bookmarkId);
+          setUserNote(bookmarkData.note);
+          setUserRating(bookmarkData.rating);
+        }
+
         const rawCast = Array.isArray(castData)
           ? castData
           : castData.cast || castData.data || [];
@@ -326,7 +339,9 @@ function SeriesDetail() {
           </Col>
           <Col md={8}>
             <div className="d-flex align-items-center mb-3">
-              <h1 className="mb-0">{series.seriesTitle}</h1>
+              <h1 className="mb-0">
+                {location.state?.seriesTitle || series.seriesTitle}
+              </h1>
               {isLoggedIn && (
                 <Button
                   variant={isInWatchlist ? "success" : "outline-primary"}
@@ -353,7 +368,19 @@ function SeriesDetail() {
             </div>
             <Card className="mt-3">
               <Card.Body>
-                <h5>Series Information</h5>
+                <h5>Details</h5>
+                {series.titleType && (
+                  <p>
+                    <strong>Type:</strong>{" "}
+                    <span className="text-capitalize">{series.titleType}</span>
+                  </p>
+                )}
+                {series.originalTitle &&
+                  series.originalTitle !== series.seriesTitle && (
+                    <p>
+                      <strong>Original Title:</strong> {series.originalTitle}
+                    </p>
+                  )}
                 {series.numberOfSeasons && (
                   <p>
                     <strong>Number of Seasons:</strong> {series.numberOfSeasons}
@@ -388,7 +415,10 @@ function SeriesDetail() {
                 )}
                 {series.genres && (
                   <p>
-                    <strong>Genres:</strong> {series.genres}
+                    <strong>Genres:</strong>{" "}
+                    {Array.isArray(series.genres)
+                      ? series.genres.join(", ")
+                      : series.genres}
                   </p>
                 )}
                 {series.writerNames && (
@@ -422,8 +452,7 @@ function SeriesDetail() {
                             from: {
                               label:
                                 location.state?.seriesTitle ||
-                                series?.seriesTitle ||
-                                "Series",
+                                series?.seriesTitle,
                               path: `/series/${id}`,
                             },
                           },

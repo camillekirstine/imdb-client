@@ -26,6 +26,8 @@ function MovieDetail() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isInWatchlist, setIsInWatchlist] = useState(false);
   const [bookmarkId, setBookmarkId] = useState(null);
+  const [userNote, setUserNote] = useState(null);
+  const [userRating, setUserRating] = useState(null);
   const apiKey = "e4f70d8185101e89d6853659d9cfd53b";
 
   useEffect(() => {
@@ -120,8 +122,8 @@ function MovieDetail() {
 
     // Fetch both movie details and cast in parallel
     Promise.all([
-      fetch(`http://localhost:5079/api/Movies/${id}`),
-      fetch(`http://localhost:5079/api/Movies/${id}/cast`),
+      authFetch(`http://localhost:5079/api/Movies/${id}`),
+      authFetch(`http://localhost:5079/api/Movies/${id}/cast`),
     ])
       .then(([movieRes, castRes]) => {
         if (!movieRes.ok) {
@@ -155,6 +157,17 @@ function MovieDetail() {
         }
 
         setMovie(movieData);
+
+        // Set bookmark status from location.state (if navigating from bookmarks) or API response
+        const bookmarkData =
+          location.state?.userBookmark || movieData.userBookmark;
+        if (bookmarkData) {
+          setIsInWatchlist(true);
+          setBookmarkId(bookmarkData.bookmarkId);
+          setUserNote(bookmarkData.note);
+          setUserRating(bookmarkData.rating);
+        }
+
         const rawCast = Array.isArray(castData)
           ? castData
           : castData.cast || castData.data || [];
@@ -237,7 +250,11 @@ function MovieDetail() {
     { label: "Browse", path: "/" },
     ...(location.state?.from ? [location.state.from] : []),
     {
-      label: location.state?.movieTitle || movie?.movieTitle || "Movie",
+      label:
+        location.state?.movieTitle ||
+        movie?.movieTitle ||
+        movie?.primaryTitle ||
+        "Title",
       active: true,
     },
   ];
@@ -327,7 +344,7 @@ function MovieDetail() {
           <Col md={8}>
             <div className="d-flex align-items-center mb-2">
               <h1 className="mb-0">
-                {movie.movieTitle}
+                {location.state?.movieTitle || movie.movieTitle}
                 {movie.startYear && (
                   <span
                     className="text-muted"
@@ -361,16 +378,21 @@ function MovieDetail() {
                 </Button>
               )}
             </div>
-            {movie.runtimeMinutes && (
-              <p className="text-muted mb-3">
-                Runtime: {movie.runtimeMinutes} minutes
-                {movie.isAdult && (
-                  <span className="badge bg-danger ms-2">Adult Content</span>
-                )}
-              </p>
-            )}
             <Card className="mt-3">
               <Card.Body>
+                <h5>Details</h5>
+                {movie.titleType && (
+                  <p>
+                    <strong>Type:</strong>{" "}
+                    <span className="text-capitalize">{movie.titleType}</span>
+                  </p>
+                )}
+                {movie.originalTitle &&
+                  movie.originalTitle !== movie.movieTitle && (
+                    <p>
+                      <strong>Original Title:</strong> {movie.originalTitle}
+                    </p>
+                  )}
                 {movie.ratedAge && (
                   <p>
                     <strong>Rated:</strong> {movie.ratedAge}
@@ -399,7 +421,10 @@ function MovieDetail() {
                 )}
                 {movie.genres && (
                   <p>
-                    <strong>Genres:</strong> {movie.genres}
+                    <strong>Genres:</strong>{" "}
+                    {Array.isArray(movie.genres)
+                      ? movie.genres.join(", ")
+                      : movie.genres}
                   </p>
                 )}
                 {movie.writerNames && (
@@ -432,10 +457,7 @@ function MovieDetail() {
                           state: {
                             from: {
                               label:
-                                location.state?.movieTitle ||
-                                movie?.primaryTitle ||
-                                movie?.title ||
-                                "Movie",
+                                location.state?.movieTitle || movie?.movieTitle,
                               path: `/movie/${id}`,
                             },
                           },
