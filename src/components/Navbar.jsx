@@ -6,6 +6,7 @@ import {
   Form,
   FormControl,
   Breadcrumb,
+  Spinner,
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { PersonCircle } from "react-bootstrap-icons";
@@ -14,6 +15,7 @@ import { authFetch } from "../utils/authFetch";
 function Navbar({ breadcrumbs }) {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
+  const [searching, setSearching] = useState(false);
 
   const handleUserIconClick = () => {
     const token = localStorage.getItem("authToken");
@@ -26,18 +28,21 @@ function Navbar({ breadcrumbs }) {
 
   const handleSearchSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!searchQuery.trim()) return;
 
     const token = localStorage.getItem("authToken");
-    
+
+    setSearching(true);
     try {
       let results = [];
-      
+
       if (token) {
         // Logged-in user: use structured search
         const response = await authFetch(
-          `http://localhost:5079/api/search/structured?query=${encodeURIComponent(searchQuery)}`
+          `http://localhost:5079/api/search/structured?query=${encodeURIComponent(
+            searchQuery
+          )}`
         );
         if (response.ok) {
           results = await response.json();
@@ -45,17 +50,21 @@ function Navbar({ breadcrumbs }) {
       } else {
         // Anonymous user: use best-match search
         const response = await fetch(
-          `http://localhost:5079/api/search/best-match?query=${encodeURIComponent(searchQuery)}`
+          `http://localhost:5079/api/search/best-match?query=${encodeURIComponent(
+            searchQuery
+          )}`
         );
         if (response.ok) {
           results = await response.json();
         }
       }
-      
+
       // Navigate to search results page with results
       navigate("/search", { state: { query: searchQuery, results } });
     } catch (err) {
       console.error("Search failed:", err);
+    } finally {
+      setSearching(false);
     }
   };
 
@@ -80,7 +89,7 @@ function Navbar({ breadcrumbs }) {
           </Nav>
 
           <Form
-            className="d-flex mx-auto"
+            className="d-flex mx-auto align-items-center"
             style={{ maxWidth: "500px", flex: 1 }}
             onSubmit={handleSearchSubmit}
           >
@@ -91,7 +100,11 @@ function Navbar({ breadcrumbs }) {
               aria-label="Search"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              disabled={searching}
             />
+            {searching && (
+              <Spinner animation="border" size="sm" variant="light" />
+            )}
           </Form>
 
           <Nav>
