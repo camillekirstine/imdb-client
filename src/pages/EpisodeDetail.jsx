@@ -9,8 +9,14 @@ import {
   Spinner,
   Alert,
   Button,
+  Form,
 } from "react-bootstrap";
-import { BookmarkPlus, BookmarkCheckFill } from "react-bootstrap-icons";
+import {
+  BookmarkPlus,
+  BookmarkCheckFill,
+  StarFill,
+  Star,
+} from "react-bootstrap-icons";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
@@ -27,6 +33,12 @@ function EpisodeDetail() {
   const [bookmarkId, setBookmarkId] = useState(null);
   const [userNote, setUserNote] = useState(null);
   const [userRating, setUserRating] = useState(null);
+  const [imdbRating, setImdbRating] = useState(null);
+  const [imdbVotes, setImdbVotes] = useState(null);
+  const [myRating, setMyRating] = useState(null);
+  const [myRatingId, setMyRatingId] = useState(null);
+  const [showRatingInput, setShowRatingInput] = useState(false);
+  const [ratingValue, setRatingValue] = useState("");
   const apiKey = "e4f70d8185101e89d6853659d9cfd53b";
 
   useEffect(() => {
@@ -144,14 +156,27 @@ function EpisodeDetail() {
       .then(([episodeData, castData]) => {
         setEpisode(episodeData);
 
-        // Set bookmark status from location.state (if navigating from bookmarks) or API response
-        const bookmarkData =
-          location.state?.userBookmark || episodeData.userBookmark;
+        // Extract IMDb rating data
+        if (episodeData.imdbAverageRating) {
+          setImdbRating(episodeData.imdbAverageRating);
+        }
+        if (episodeData.imdbNumVotes) {
+          setImdbVotes(episodeData.imdbNumVotes);
+        }
+
+        // Always use userBookmark from API response
+        const bookmarkData = episodeData.userBookmark;
         if (bookmarkData) {
-          setIsInWatchlist(true);
+          const isBookmarked =
+            bookmarkData.isBookmarked && bookmarkData.bookmarkId !== null;
+          setIsInWatchlist(isBookmarked);
           setBookmarkId(bookmarkData.bookmarkId);
           setUserNote(bookmarkData.note);
           setUserRating(bookmarkData.rating);
+          if (bookmarkData.hasOwnProperty("rating")) {
+            setMyRating(bookmarkData.rating);
+            setMyRatingId(bookmarkData.ratingId);
+          }
         }
 
         // Process cast data with TMDB photos
@@ -217,6 +242,93 @@ function EpisodeDetail() {
         setLoading(false);
       });
   }, [id, apiKey]);
+
+  const handleAddRating = async () => {
+    const rating = parseInt(ratingValue);
+    if (isNaN(rating) || rating < 1 || rating > 10) {
+      alert("Please enter a rating between 1 and 10");
+      return;
+    }
+
+    try {
+      const response = await authFetch(
+        `http://localhost:5079/api/Ratings/movie/${id}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ rating }),
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setMyRating(rating);
+        setMyRatingId(data.id);
+        setShowRatingInput(false);
+        setRatingValue("");
+      } else {
+        throw new Error("Failed to add rating");
+      }
+    } catch (err) {
+      console.error("Error adding rating:", err);
+      alert("Failed to add rating");
+    }
+  };
+
+  const handleUpdateRating = async () => {
+    const rating = parseInt(ratingValue);
+    if (isNaN(rating) || rating < 1 || rating > 10) {
+      alert("Please enter a rating between 1 and 10");
+      return;
+    }
+
+    try {
+      const response = await authFetch(
+        `http://localhost:5079/api/Ratings/${myRatingId}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ rating }),
+        }
+      );
+
+      if (response.status === 204 || response.ok) {
+        setMyRating(rating);
+        setShowRatingInput(false);
+        setRatingValue("");
+      } else {
+        throw new Error("Failed to update rating");
+      }
+    } catch (err) {
+      console.error("Error updating rating:", err);
+      alert("Failed to update rating");
+    }
+  };
+
+  const handleDeleteRating = async () => {
+    if (!window.confirm("Are you sure you want to delete your rating?")) {
+      return;
+    }
+
+    try {
+      const response = await authFetch(
+        `http://localhost:5079/api/Ratings/${myRatingId}`,
+        { method: "DELETE" }
+      );
+
+      if (response.status === 204 || response.ok) {
+        setMyRating(null);
+        setMyRatingId(null);
+        setShowRatingInput(false);
+        setRatingValue("");
+      } else {
+        throw new Error("Failed to delete rating");
+      }
+    } catch (err) {
+      console.error("Error deleting rating:", err);
+      alert("Failed to delete rating");
+    }
+  };
 
   const breadcrumbs = [
     { label: "Browse", path: "/" },
@@ -364,6 +476,103 @@ function EpisodeDetail() {
                 </Button>
               )}
             </div>
+
+            {/* Rating Section */}
+            {isLoggedIn && (
+              <Card className="mt-3">
+                <Card.Body>
+                  <h5>Rating</h5>
+                  {imdbRating && (
+                    <p className="mb-2">
+                      <strong>IMDb Rating:</strong> {imdbRating}/10
+                      {imdbVotes && (
+                        <span className="text-muted ms-2">
+                          ({imdbVotes.toLocaleString()} votes)
+                        </span>
+                      )}
+                    </p>
+                  )}
+
+                  {myRating ? (
+                    <div className="d-flex align-items-center gap-2">
+                      <p className="mb-0">
+                        <StarFill className="text-warning me-1" />
+                        <strong>Your Rating:</strong> {myRating}/10
+                      </p>
+                      {!showRatingInput && (
+                        <>
+                          <Button
+                            size="sm"
+                            variant="outline-primary"
+                            onClick={() => {
+                              setShowRatingInput(true);
+                              setRatingValue(myRating.toString());
+                            }}
+                          >
+                            Edit
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline-danger"
+                            onClick={handleDeleteRating}
+                          >
+                            Delete
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  ) : (
+                    !showRatingInput && (
+                      <Button
+                        size="sm"
+                        variant="outline-primary"
+                        onClick={() => setShowRatingInput(true)}
+                      >
+                        <Star className="me-1" />
+                        Rate this title
+                      </Button>
+                    )
+                  )}
+
+                  {showRatingInput && (
+                    <div className="mt-3">
+                      <Form.Group className="mb-2">
+                        <Form.Label>Rating (1-10)</Form.Label>
+                        <Form.Control
+                          type="number"
+                          min="1"
+                          max="10"
+                          value={ratingValue}
+                          onChange={(e) => setRatingValue(e.target.value)}
+                          placeholder="Enter rating 1-10"
+                        />
+                      </Form.Group>
+                      <div className="d-flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="primary"
+                          onClick={
+                            myRating ? handleUpdateRating : handleAddRating
+                          }
+                        >
+                          {myRating ? "Update" : "Submit"}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => {
+                            setShowRatingInput(false);
+                            setRatingValue("");
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </Card.Body>
+              </Card>
+            )}
 
             <Card className="mt-3">
               <Card.Body>

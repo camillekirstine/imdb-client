@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card, Row, Col, Button, Spinner, Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { Trash } from "react-bootstrap-icons";
+import { Trash, StarFill } from "react-bootstrap-icons";
 import { authFetch } from "../utils/authFetch";
 
 function UserBookmarks() {
@@ -223,6 +223,12 @@ function UserBookmarks() {
                           bookmark.episodeTitle ||
                           "Unknown Title"}
                       </Card.Title>
+                      {bookmark.rating && (
+                        <div className="text-warning mb-2">
+                          <StarFill className="me-1" />
+                          <strong>{bookmark.rating}/10</strong>
+                        </div>
+                      )}
                       <Button
                         variant="danger"
                         size="sm"
