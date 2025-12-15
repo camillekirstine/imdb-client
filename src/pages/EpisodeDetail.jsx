@@ -11,7 +11,7 @@ import Breadcrumbs from "../components/navigation/Breadcrumbs";
 import DetailLayout from "../components/layout/DetailLayout";
 import InfoCard from "../components/common/InfoCard";
 import SmartImage from "../components/common/SmartImage";
-import NotesSection from "../components/notes/NotesSection";
+
 
 export default function EpisodeDetail() {
   const { id } = useParams();
@@ -88,7 +88,7 @@ export default function EpisodeDetail() {
 
   const footerContent = (
     <>
-      <NotesSection tconst={id} />
+    
 
       {cast.length > 0 && (
         <Card className="shadow-sm">

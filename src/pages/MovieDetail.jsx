@@ -5,11 +5,9 @@ import {
   Card,
   Spinner,
   Alert,
-  Button,
   Badge,
-  Form,
 } from "react-bootstrap";
-import { BookmarkPlus, BookmarkCheckFill } from "react-bootstrap-icons";
+import MyActivityPanel from "../components/user/MyActivityPanel";
 
 import useMovie from "../hooks/useMovie";
 import useCast from "../hooks/useCast";
@@ -22,7 +20,6 @@ import Breadcrumbs from "../components/navigation/Breadcrumbs";
 import DetailLayout from "../components/layout/DetailLayout";
 import InfoCard from "../components/common/InfoCard";
 import SmartImage from "../components/common/SmartImage";
-import NotesSection from "../components/notes/NotesSection";
 
 export default function MovieDetail() {
   const { id } = useParams();
@@ -97,46 +94,22 @@ export default function MovieDetail() {
         }}
       />
 
-      <div className="d-grid gap-2 mt-3">
-        {isLoggedIn ? (
-          <>
-            <Button
-              variant={isBookmarked ? "success" : "outline-primary"}
-              onClick={isBookmarked ? removeBookmark : addBookmark}
-            >
-              {isBookmarked ? (
-                <BookmarkCheckFill className="me-2" />
-              ) : (
-                <BookmarkPlus className="me-2" />
-              )}
-              {isBookmarked ? "Bookmarked" : "Add to Watchlist"}
-            </Button>
+<MyActivityPanel
+  isLoggedIn={isLoggedIn}
+  isBookmarked={isBookmarked}
+  onBookmark={addBookmark}
+  onUnbookmark={removeBookmark}
+  rating={rating}
+  onRate={saveRating}
+  noteTarget={{ tconst: id }}
+/>
 
-            <Form.Select
-              value={rating ?? ""}
-              onChange={(e) => saveRating(Number(e.target.value))}
-            >
-              <option value="">Rate this title</option>
-              {[1,2,3,4,5,6,7,8,9,10].map(n => (
-                <option key={n} value={n}>{n}</option>
-              ))}
-            </Form.Select>
-          </>
-        ) : (
-          <Button
-            variant="outline-secondary"
-            onClick={() => navigate("/user/login")}
-          >
-            Log in to bookmark or rate
-          </Button>
-        )}
-      </div>
     </>
   );
 
   const footerContent = (
     <>
-      <NotesSection tconst={id} />
+      
 
       {cast.length > 0 && (
         <Card className="shadow-sm">

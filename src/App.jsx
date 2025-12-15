@@ -6,6 +6,8 @@ import {
   Route,
   Outlet,
 } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 // Layout
 import Navbar from "./components/layout/Navbar";
@@ -115,6 +117,7 @@ export default function App() {
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
+      <ToastContainer position="bottom-right" />
     </BrowserRouter>
   );
 }

@@ -1,11 +1,11 @@
 import React from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { Container, Card, Spinner, Alert, Button } from "react-bootstrap";
-import { BookmarkPlus, BookmarkCheckFill } from "react-bootstrap-icons";
 
 import usePersonDetails from "../hooks/usePersonDetails";
 import usePersonImages from "../hooks/usePersonImages";
 import useBookmarks from "../hooks/useBookmarks";
+import MyActivityPanel from "../components/user/MyActivityPanel";
 
 import Breadcrumbs from "../components/navigation/Breadcrumbs";
 import DetailLayout from "../components/layout/DetailLayout";
@@ -13,7 +13,6 @@ import InfoCard from "../components/common/InfoCard";
 import CreditCard from "../components/people/CreditCard";
 import PersonImageGallery from "../components/people/PersonImageGallery";
 import SmartImage from "../components/common/SmartImage";
-import NotesSection from "../components/notes/NotesSection";
 
 export default function PersonDetail() {
   const { id } = useParams();
@@ -62,28 +61,14 @@ export default function PersonDetail() {
         }}
       />
 
-      <div className="d-grid gap-2 mt-3">
-        {isLoggedIn ? (
-          <Button
-            variant={isBookmarked ? "success" : "outline-primary"}
-            onClick={isBookmarked ? removeBookmark : addBookmark}
-          >
-            {isBookmarked ? (
-              <BookmarkCheckFill className="me-2" />
-            ) : (
-              <BookmarkPlus className="me-2" />
-            )}
-            Bookmark
-          </Button>
-        ) : (
-          <Button
-            variant="outline-secondary"
-            onClick={() => navigate("/user/login")}
-          >
-            Log in to bookmark
-          </Button>
-        )}
-      </div>
+      <MyActivityPanel
+        isLoggedIn={isLoggedIn}
+        isBookmarked={isBookmarked}
+        onBookmark={addBookmark}
+        onUnbookmark={removeBookmark}
+        noteTarget={{ nconst: id }}
+      />
+
     </>
   );
 
@@ -106,7 +91,7 @@ export default function PersonDetail() {
         aboutCard={<InfoCard title="About" items={aboutItems} />}
         footerContent={
           <>
-            <NotesSection nconst={id} />
+            
 
             {images.length > 0 && (
               <Card className="mb-4 shadow-sm">
