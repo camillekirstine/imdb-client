@@ -1,0 +1,2 @@
+export const PERSON_PLACEHOLDER =
+  "https://via.placeholder.com/300x450?text=No+Image";
