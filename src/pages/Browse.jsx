@@ -4,9 +4,6 @@ import useMoviesList from "../hooks/useMoviesList";
 
 import {
   Container,
-  Row,
-  Col,
-  Card,
   Spinner,
   Alert,
   Pagination,
@@ -37,10 +34,6 @@ const GENRES = [
   "History", "Drama", "Mystery", "Sci-Fi",
 ];
 
-/**
- * Unified browse page for movies and series.
- * Content type (movie / series / all) is treated as a filter.
- */
 export default function Browse({ defaultType = "all" }) {
   const navigate = useNavigate();
   const location = useLocation();
@@ -62,7 +55,7 @@ export default function Browse({ defaultType = "all" }) {
 
   const params = {
     page,
-    pageSize: 20,
+    pageSize: 18,
     type: contentType === "all" ? undefined : contentType,
     genre: genre !== "All" ? genre : undefined,
     sort: sort !== "default" ? sort : undefined,
@@ -142,10 +135,7 @@ export default function Browse({ defaultType = "all" }) {
 
           <Form.Group>
             <Form.Label>Genre</Form.Label>
-            <Form.Select
-              value={genre}
-              onChange={(e) => setGenre(e.target.value)}
-            >
+            <Form.Select value={genre} onChange={(e) => setGenre(e.target.value)}>
               {GENRES.map((g) => (
                 <option key={g}>{g}</option>
               ))}
@@ -154,10 +144,7 @@ export default function Browse({ defaultType = "all" }) {
 
           <Form.Group>
             <Form.Label>Sort</Form.Label>
-            <Form.Select
-              value={sort}
-              onChange={(e) => setSort(e.target.value)}
-            >
+            <Form.Select value={sort} onChange={(e) => setSort(e.target.value)}>
               <option value="default">Default</option>
               <option value="top-rated">Top Rated</option>
               <option value="newest">Newest</option>
@@ -165,7 +152,6 @@ export default function Browse({ defaultType = "all" }) {
             </Form.Select>
           </Form.Group>
 
-          {/* Debug toggle (DEV ONLY) */}
           {ENABLE_DEBUG && (
             <Button
               size="sm"
@@ -189,59 +175,32 @@ export default function Browse({ defaultType = "all" }) {
           <Alert variant="info">No results found.</Alert>
         )}
 
-        {/* Debug output (DEV ONLY) */}
+        {/* Debug */}
         {ENABLE_DEBUG && (
           <Collapse in={showRaw}>
-            <pre
-              className="p-2 bg-light"
-              style={{ maxHeight: 300, overflow: "auto" }}
-            >
-              {JSON.stringify(
-                { params, preview: list.slice(0, 3) },
-                null,
-                2
-              )}
+            <pre className="p-2 bg-light" style={{ maxHeight: 300, overflow: "auto" }}>
+              {JSON.stringify({ params, preview: list.slice(0, 3) }, null, 2)}
             </pre>
           </Collapse>
         )}
 
-        {/* Grid */}
-        <Row xs={2} md={3} lg={4} xl={5} className="g-4">
-          {list.map((item) => {
-            const id = item.tconst ?? item.id;
-            const avg =
-              item.AverageRating ??
-              item.averageRating ??
-              item._avg ??
-              0;
+        {/* GRID */}
+        <div className="movie-grid">
+  {list.map((item) => {
+    const id = item.tconst ?? item.id;
+    const avg =
+      item.AverageRating ??
+      item.averageRating ??
+      item._avg ??
+      0;
 
-            item._avg = avg;
-
-            return (
-              <Col key={id}>
-                <Card
-  className="h-100"
-  style={{ cursor: "pointer" }}
-  onClick={() =>
-    navigate(getCardPath(item), {
-      state: {
-        from: { label: "Browse", path: "/browse" },
-      },
-    })
-  }
->
-
-                  <MovieCard movie={item} />
-                  <Card.Footer>
-                    <small className="text-muted">
-                      Rating: {avg ? avg.toFixed(1) : "—"}
-                    </small>
-                  </Card.Footer>
-                </Card>
-              </Col>
-            );
-          })}
-        </Row>
+    return (
+      <div key={id} className="movie-grid__item">
+        <MovieCard movie={item} rating={avg} />
+      </div>
+    );
+  })}
+</div>
 
         {/* Pagination */}
         <div className="d-flex flex-column align-items-center mt-4">

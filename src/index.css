@@ -51,19 +51,6 @@
   button:focus-visible {
     outline: 4px auto -webkit-focus-ring-color;
   }
-  
-  @media (prefers-color-scheme: light) {
-    :root {
-      color: #213547;
-      background-color: #ffffff;
-    }
-    a:hover {
-      color: #747bff;
-    }
-    button {
-      background-color: #f9f9f9;
-    }
-  }
 
   .hide-scrollbar {
     scrollbar-width: none;          /* Firefox */
@@ -73,5 +60,63 @@
   .hide-scrollbar::-webkit-scrollbar {
     display: none;                  /* Chrome, Safari, Opera */
   }
+
+  /* ===========================
+   Home – Movie Grid Layout
+=========================== */
+
+.movie-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1.25rem;
+  width: 100%;
+}
+
+.movie-row__item {
+  width: 100%;
+  max-width: 180px;
+  height: 300px;
+  justify-self: center;
+  cursor: pointer;
+}
+
+/* ===========================
+   Browse – Movie Grid
+=========================== */
+
+.movie-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1.25rem;
+  width: 100%;
+}
+
+.movie-grid__item {
+  max-width: 180px;
+  justify-self: center;
+}
+
+
+.movie-grid__rating {
+  font-size: 0.85rem;
+  color: #6c757d;
+  padding-top: 0.25rem;
+  text-align: center;
+}
+
+
   
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  a:hover {
+    color: #747bff;
+  }
+  button {
+    background-color: #f9f9f9;
+  }
+}
+
   

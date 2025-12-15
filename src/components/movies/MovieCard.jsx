@@ -18,8 +18,7 @@ const FALLBACK_SVG =
   </svg>
 `);
 
-
-export default function MovieCard({ movie }) {
+export default function MovieCard({ movie, rating }) {
   const navigate = useNavigate();
   const route = getCardPath(movie);
   const isClickable = Boolean(route);
@@ -81,6 +80,12 @@ export default function MovieCard({ movie }) {
       <Card.Body className="movie-card__body">
         <div className="movie-card__title">{friendlyTitle}</div>
       </Card.Body>
+
+      {typeof rating === "number" && (
+        <Card.Footer className="movie-card__footer">
+          Rating: {rating ? rating.toFixed(1) : "—"}
+        </Card.Footer>
+      )}
     </Card>
   );
 }

@@ -6,6 +6,12 @@ import MovieCard from "../components/movies/MovieCard";
 import { getCardPath } from "./listPageHelpers";
 
 /* ---------------------------
+   Card size constants
+---------------------------- */
+const CARD_WIDTH = 180;
+const CARD_HEIGHT = 300;
+
+/* ---------------------------
    Helpers
 ---------------------------- */
 const getPoster = (item) =>
@@ -18,11 +24,10 @@ function SkeletonCard() {
   return (
     <div
       style={{
-        width: 180,
-        height: 300,
+        width: CARD_WIDTH,
+        height: CARD_HEIGHT,
         background: "#e5e5e5",
         borderRadius: 6,
-        flex: "0 0 auto",
       }}
     />
   );
@@ -37,12 +42,12 @@ function SectionRow({ title, params, seeMoreLink }) {
 
   const { list, loading } = useMoviesList({
     ...params,
-    type: "movie", // ✅ FORCE MOVIES ONLY
+    type: "movie",
   });
 
   return (
     <section className="mb-5">
-      <div className="d-flex justify-content-between align-items-center mb-2">
+      <div className="d-flex justify-content-between align-items-center mb-3">
         <h4 className="mb-0">{title}</h4>
 
         {seeMoreLink && (
@@ -56,7 +61,7 @@ function SectionRow({ title, params, seeMoreLink }) {
         )}
       </div>
 
-      <div className="d-flex gap-3 overflow-auto pb-2">
+      <div className="movie-row">
         {loading &&
           Array.from({ length: params.pageSize || 6 }).map((_, i) => (
             <SkeletonCard key={i} />
@@ -69,12 +74,10 @@ function SectionRow({ title, params, seeMoreLink }) {
             return (
               <div
                 key={item.tconst}
-                style={{ width: 180, height: 300, cursor: "pointer" }}
+                className="movie-row__item"
                 onClick={() =>
                   navigate(path, {
-                    state: {
-                      from: { label: "Home", path: "/" },
-                    },
+                    state: { from: { label: "Home", path: "/" } },
                   })
                 }
               >
@@ -96,8 +99,8 @@ function FeaturedCarousel() {
 
   const { list, loading } = useMoviesList({
     sort: "top-rated",
-    type: "movie", // ✅ FORCE MOVIES ONLY
-    pageSize: 5,
+    type: "movie",
+    pageSize: 10,
   });
 
   const itemsWithImages = list.filter((i) => getPoster(i));
