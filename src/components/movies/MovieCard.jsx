@@ -3,7 +3,7 @@ import { Card, Badge } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { formatTitleType } from "../../utils/formatLabel";
 import { getTitleTypeVariant } from "../../utils/titleTypeBadge";
-import { getCardPath } from "../../pages/listPageHelpers";
+import { getCardPath } from "../../pages/ListPageHelpers";
 import SmartImage from "../common/SmartImage";
 
 import "./MovieCard.css";
