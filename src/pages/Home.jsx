@@ -3,7 +3,7 @@ import { Container, Carousel } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import useMoviesList from "../hooks/useMoviesList";
 import MovieCard from "../components/movies/MovieCard";
-import { getCardPath } from "./listPageHelpers";
+import { getCardPath } from "./ListPageHelpers";
 
 /*
   Home
