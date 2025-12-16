@@ -19,9 +19,10 @@ export default function UserLogIn() {
 
     try {
       await login(identifier, password);
-      navigate("/user/profile");
+      navigate("/user");
     } catch (err) {
-      setError(err?.message || "Login failed");
+      
+      setError("Incorrect username/email or password");
     } finally {
       setLoading(false);
     }

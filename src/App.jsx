@@ -32,6 +32,10 @@ import UserBookmarksPanel from "./components/user/UserBookmarks";
 import UserRatingsPanel from "./components/user/UserRatings";
 import UserSearchHistoryPanel from "./components/user/UserSearchHistory";
 import UserNotesPanel from "./components/user/UserNotesPanel";
+import EditProfilePanel from "./components/user/EditProfilePanel";
+import ResetPasswordPanel from "./components/user/ResetPasswordPanel";
+
+
 
 
 // Auth
@@ -104,13 +108,18 @@ export default function App() {
               </RequireAuth>
             }
           >
-            <Route index element={<ProfilePanel />} />
-            <Route path="profile" element={<ProfilePanel />} />
+            {/* Default = Bookmarks */}
+            <Route index element={<UserBookmarksPanel />} />
+
+            {/* Main panels */}
             <Route path="bookmarks" element={<UserBookmarksPanel />} />
             <Route path="ratings" element={<UserRatingsPanel />} />
             <Route path="history" element={<UserSearchHistoryPanel />} />
             <Route path="notes" element={<UserNotesPanel />} />
 
+            {/* Account management */}
+            <Route path="profile" element={<EditProfilePanel />} />
+            <Route path="password" element={<ResetPasswordPanel />} />
           </Route>
 
           {/* Fallback */}

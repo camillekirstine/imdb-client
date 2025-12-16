@@ -1,26 +1,34 @@
 import React, { useState } from "react";
-import { Navbar, Container, Nav, Form, Button } from "react-bootstrap";
+import {
+  Navbar,
+  Container,
+  Nav,
+  Form,
+  Button,
+  Dropdown,
+} from "react-bootstrap";
 import { LinkContainer } from "react-router-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { FaUser } from "react-icons/fa";
+import { API_ORIGIN } from "../../config/apiConfig";
 
 export default function AppNavbar() {
   const [searchQuery, setSearchQuery] = useState("");
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, logout, user } = useAuth();
   const navigate = useNavigate();
 
   const handleSearch = (e) => {
     e.preventDefault();
-
     const q = searchQuery.trim();
     if (!q) return;
-
     navigate(`/search?query=${encodeURIComponent(q)}`);
   };
 
-  const handleUserClick = () => {
-    navigate(isLoggedIn ? "/user/profile" : "/user/login");
+  const goToProfile = () => navigate("/user");
+
+  const handleLogout = () => {
+    logout();
+    navigate("/user/login");
   };
 
   return (
@@ -31,6 +39,7 @@ export default function AppNavbar() {
         </LinkContainer>
 
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
+
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
             <LinkContainer to="/browse">
@@ -38,8 +47,8 @@ export default function AppNavbar() {
             </LinkContainer>
           </Nav>
 
-          {/* Search Bar */}
-          <Form className="d-flex" onSubmit={handleSearch}>
+          {/* Search */}
+          <Form className="d-flex me-3" onSubmit={handleSearch}>
             <Form.Control
               type="search"
               placeholder="Search movies..."
@@ -52,11 +61,63 @@ export default function AppNavbar() {
             </Button>
           </Form>
 
-          {/* User Icon */}
+          {/* User avatar dropdown */}
           <Nav>
-            <Nav.Link onClick={handleUserClick} style={{ cursor: "pointer" }}>
-              <FaUser size={24} />
-            </Nav.Link>
+            {!isLoggedIn ? (
+              <Nav.Link
+                onClick={() => navigate("/user/login")}
+                style={{ cursor: "pointer" }}
+                aria-label="Log in"
+              >
+                <img
+                  src={`${API_ORIGIN}/uploads/avatars/default.png`}
+                  alt="User"
+                  width={32}
+                  height={32}
+                  className="rounded-circle"
+                />
+              </Nav.Link>
+            ) : (
+              <Dropdown align="end">
+                <Dropdown.Toggle
+                  variant="link"
+                  id="user-dropdown"
+                  className="d-flex align-items-center text-decoration-none p-0"
+                >
+                  <img
+                    src={`${API_ORIGIN}${user.profileImageUrl}`}
+                    alt="User avatar"
+                    width={32}
+                    height={32}
+                    className="rounded-circle"
+                    style={{ objectFit: "cover" }}
+                    onError={(e) => {
+                      e.currentTarget.src =
+                        `${API_ORIGIN}/uploads/avatars/default.png`;
+                    }}
+                  />
+                </Dropdown.Toggle>
+
+                <Dropdown.Menu className="dropdown-animate">
+                  <Dropdown.Header className="fw-semibold">
+                    {user.username}
+                  </Dropdown.Header>
+
+                  <Dropdown.Item onClick={goToProfile}>
+                    Profile
+                  </Dropdown.Item>
+
+                  <Dropdown.Divider />
+
+                  <Dropdown.Item
+                    className="text-danger"
+                    onClick={handleLogout}
+                  >
+                    Log out
+                  </Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
+            )}
           </Nav>
         </Navbar.Collapse>
       </Container>

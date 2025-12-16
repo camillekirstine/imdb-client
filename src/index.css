@@ -110,7 +110,26 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-  
+
+
+.dropdown-animate {
+  animation: fadeSlideDown 0.15s ease-out;
+  transform-origin: top right;
+}
+
+@keyframes fadeSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;

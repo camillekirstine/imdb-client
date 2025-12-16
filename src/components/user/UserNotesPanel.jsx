@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import useUserNotesWithMedia from "../../hooks/useUserNotesWithMedia";
 import MovieCard from "../movies/MovieCard";
 import PersonCard from "../people/PersonCard";
+import ProfilePanel from "../ProfilePanel";
 
 const CARD_HEIGHT = 420;
 const MEDIA_HEIGHT = 280;
@@ -17,7 +18,13 @@ export default function UserNotesPanel() {
   const navigate = useNavigate();
 
   if (loading) return <Spinner />;
-  if (!items.length) return <p>No notes yet.</p>;
+  if (!items.length) {
+    return (
+      <ProfilePanel title="Notes">
+        <p className="text-muted">No notes yet.</p>
+      </ProfilePanel>
+    );
+  }
 
   const titleNotes = items.filter(i => i.type === "title");
   const personNotes = items.filter(i => i.type === "person");
@@ -25,7 +32,6 @@ export default function UserNotesPanel() {
   async function save(noteId) {
     if (!draft.trim()) return;
     await update(noteId, draft);
-
     cancelEdit();
   }
 
@@ -56,11 +62,8 @@ export default function UserNotesPanel() {
             />
 
             <div className="mt-auto">
-              <Button
-                size="sm"
-                className="w-100 mb-1"
-                onClick={() => save(note.noteId)}
-              >
+              <Button size="sm" className="w-100 mb-1"
+                onClick={() => save(note.noteId)}>
                 Save
               </Button>
               <Button
@@ -119,46 +122,31 @@ export default function UserNotesPanel() {
 
   function renderMedia(children) {
     return (
-      <div
-        style={{
-          height: MEDIA_HEIGHT,
-          overflow: "hidden",
-        }}
-      >
+      <div style={{ height: MEDIA_HEIGHT, overflow: "hidden" }}>
         {children}
       </div>
     );
   }
 
   return (
-    <>
-      {/* ---------- TITLES ---------- */}
+    <ProfilePanel title="Notes">
       {titleNotes.length > 0 && (
         <>
-          <h5 className="mb-3">Titles</h5>
+          <h6 className="mb-2">Titles</h6>
           {renderGrid(
             titleNotes.map(({ note, media }) => (
               <Card
                 key={note.noteId}
-                style={{
-                  height: CARD_HEIGHT,
-                  display: "flex",
-                  flexDirection: "column",
-                }}
+                style={{ height: CARD_HEIGHT }}
               >
                 {renderMedia(
                   <MovieCard
-                    movie={{
-                      tconst: media.tconst,
-                      title: media.title,
-                      posterUrl: media.posterUrl,
-                    }}
+                    movie={media}
                     onClick={() =>
                       navigate(`/movie/${media.tconst}`)
                     }
                   />
                 )}
-
                 {renderNoteBody(note)}
               </Card>
             ))
@@ -166,36 +154,24 @@ export default function UserNotesPanel() {
         </>
       )}
 
-      {/* ---------- PEOPLE ---------- */}
       {personNotes.length > 0 && (
         <>
-          <h5 className="mb-3 mt-4">People</h5>
+          <h6 className="mb-2 mt-4">People</h6>
           {renderGrid(
             personNotes.map(({ note, media }) => (
               <Card
                 key={note.noteId}
-                style={{
-                  height: CARD_HEIGHT,
-                  display: "flex",
-                  flexDirection: "column",
-                }}
+                style={{ height: CARD_HEIGHT }}
               >
                 {renderMedia(
-                  <PersonCard
-                    person={{
-                      nconst: media.nconst,
-                      primaryName: media.name,
-                      profileUrl: media.profileUrl,
-                    }}
-                  />
+                  <PersonCard person={media} />
                 )}
-
                 {renderNoteBody(note)}
               </Card>
             ))
           )}
         </>
       )}
-    </>
+    </ProfilePanel>
   );
 }

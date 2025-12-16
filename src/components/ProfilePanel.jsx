@@ -1,22 +1,16 @@
-import React from "react";
-import useUserProfile from "../hooks/useUserProfile";
+import { Card } from "react-bootstrap";
 
 /**
- * Default panel shown on /user and /user/profile.
- * Displays basic user information.
+ * Shared wrapper for all user panels.
+ * Ensures consistent layout across the user dashboard.
  */
-export default function ProfilePanel() {
-  const { profile } = useUserProfile();
-
-  if (!profile) return null;
-
+export default function ProfilePanel({ title, children }) {
   return (
-    <>
-      <h5 className="mb-1">Username</h5>
-      <p className="mb-3">{profile.username}</p>
-
-      <h5 className="mb-1">Email</h5>
-      <p>{profile.email}</p>
-    </>
+    <Card className="mb-4">
+      <Card.Body>
+        {title && <h4 className="mb-3">{title}</h4>}
+        {children}
+      </Card.Body>
+    </Card>
   );
 }

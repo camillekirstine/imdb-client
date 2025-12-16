@@ -5,6 +5,10 @@
 
 export const API_BASE = import.meta.env.VITE_API_BASE?.replace(/\/$/, '') || 'http://localhost:5079/api';
 
+
+// The get profile pictures for the user 
+export const API_ORIGIN = API_BASE.replace(/\/api$/, "");
+
 // TMDB image host (stable) — keep as a constant rather than reading from env
 export const TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p';
 

@@ -56,9 +56,17 @@ export function AuthProvider({ children }) {
     setUser(res.user);
   }
 
-  async function register(payload) {
-    return backend.post("/Auth/register", payload);
+  async function register({ username, email, password, fullName, avatar }) {
+    const form = new FormData();
+    form.append("username", username);
+    form.append("email", email);
+    form.append("password", password);
+    if (fullName) form.append("fullName", fullName);
+    if (avatar) form.append("avatar", avatar);
+  
+    return backend.post("/Auth/register", form);
   }
+  
 
   function logout() {
     localStorage.removeItem("authToken");
