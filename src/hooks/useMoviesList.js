@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import movieService from "../api/movieService";
 import { enrichTitleWithImage } from "../utils/enrichTitle";
-import { getTypeFromTitleType } from "../pages/listPageHelpers";
+import { getTypeFromTitleType } from "../pages/ListPageHelpers";
 
 function normalizeList(payload) {
   if (!payload) return [];
