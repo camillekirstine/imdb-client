@@ -1,20 +1,33 @@
+/* =====================================================
+   Movie Card
+===================================================== */
+
 .movie-card {
-  height: 300px; /* fixed everywhere */
+  height: 100%;
   display: flex;
   flex-direction: column;
   cursor: pointer;
+  background-color: var(--bg-surface);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: transform var(--transition-base),
+    box-shadow var(--transition-base);
+}
+
+.movie-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
 }
 
 /* ---------------------------
    Poster
 ---------------------------- */
 .movie-card__poster-wrapper {
+  position: relative;
   width: 100%;
   aspect-ratio: 2 / 3;
-  background-color: #e0e0e0;
+  background-color: var(--bg-surface-muted);
   overflow: hidden;
-  position: relative;
-  flex: 0 0 auto;
 }
 
 .movie-card__poster {
@@ -23,28 +36,27 @@
   object-fit: cover;
 }
 
+/* Badge (movie / series / episode) */
 .movie-card__badge {
   position: absolute;
   top: 8px;
   left: 8px;
   z-index: 2;
-  pointer-events: none;
 }
 
+
 /* ---------------------------
-   Body (TITLE)
+   Body (title)
 ---------------------------- */
 .movie-card__body {
-  flex: 0 0 auto;          
-  padding: 0.4rem 0.6rem;
-  max-width: 100%;       
+  padding: 0.5rem 0.65rem;
 }
 
 .movie-card__title {
-  display: block;        
-  max-width: 100%;        
+  font-size: 0.9rem;
   font-weight: 600;
-  line-height: 1.2;
+  line-height: 1.25;
+  color: var(--text-primary);
 
   white-space: nowrap;
   overflow: hidden;
@@ -55,10 +67,11 @@
    Footer (rating)
 ---------------------------- */
 .movie-card__footer {
-  flex: 0 0 auto;
-  font-size: 0.8rem;
-  color: #6c757d;
-  text-align: center;
+  margin-top: auto;
   padding: 0.35rem 0;
-  background: #f8f9fa;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border-subtle);
+  background-color: transparent;
 }

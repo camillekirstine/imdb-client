@@ -1,6 +1,6 @@
 import React from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
-import { Container, Card, Spinner, Alert, Button } from "react-bootstrap";
+import { Container, Card, Spinner, Alert } from "react-bootstrap";
 
 import usePersonDetails from "../hooks/usePersonDetails";
 import usePersonImages from "../hooks/usePersonImages";
@@ -68,7 +68,6 @@ export default function PersonDetail() {
         onUnbookmark={removeBookmark}
         noteTarget={{ nconst: id }}
       />
-
     </>
   );
 
@@ -91,11 +90,9 @@ export default function PersonDetail() {
         aboutCard={<InfoCard title="About" items={aboutItems} />}
         footerContent={
           <>
-            
-
             {images.length > 0 && (
               <Card className="mb-4 shadow-sm">
-                <Card.Header className="fw-semibold bg-white">
+                <Card.Header className="fw-semibold">
                   Photos
                 </Card.Header>
                 <Card.Body>
@@ -107,7 +104,7 @@ export default function PersonDetail() {
             {Array.isArray(person.credits) &&
               person.credits.length > 0 && (
                 <Card className="shadow-sm">
-                  <Card.Header className="fw-semibold bg-white">
+                  <Card.Header className="fw-semibold">
                     Credits
                   </Card.Header>
                   <Card.Body>

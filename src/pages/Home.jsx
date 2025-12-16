@@ -5,8 +5,12 @@ import useMoviesList from "../hooks/useMoviesList";
 import MovieCard from "../components/movies/MovieCard";
 import { getCardPath } from "./listPageHelpers";
 
+/*
+  Home
+*/
+
 /* ---------------------------
-   Card size constants
+   Shared constants
 ---------------------------- */
 const CARD_WIDTH = 180;
 const CARD_HEIGHT = 300;
@@ -18,7 +22,7 @@ const getPoster = (item) =>
   item.posterUrl || item.tmdbPoster || item.poster_path || null;
 
 /* ---------------------------
-   Skeleton Card
+   Skeleton placeholder
 ---------------------------- */
 function SkeletonCard() {
   return (
@@ -26,16 +30,15 @@ function SkeletonCard() {
       style={{
         width: CARD_WIDTH,
         height: CARD_HEIGHT,
-        background: "#e5e5e5",
-        borderRadius: 6,
+        borderRadius: "var(--radius-md)",
+        backgroundColor: "var(--bg-surface-muted)",
       }}
     />
   );
 }
 
 /* ---------------------------
-   Horizontal Section Row
-   MOVIES ONLY
+   Horizontal section row
 ---------------------------- */
 function SectionRow({ title, params, seeMoreLink }) {
   const navigate = useNavigate();
@@ -47,13 +50,14 @@ function SectionRow({ title, params, seeMoreLink }) {
 
   return (
     <section className="mb-5">
+      {/* Section header */}
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h4 className="mb-0">{title}</h4>
 
         {seeMoreLink && (
           <span
             role="button"
-            className="text-primary"
+            className="text-muted"
             onClick={() => navigate(seeMoreLink)}
           >
             See more →
@@ -61,7 +65,8 @@ function SectionRow({ title, params, seeMoreLink }) {
         )}
       </div>
 
-      <div className="movie-row">
+      {/* Horizontal scroll row */}
+      <div className="movie-row hide-scrollbar">
         {loading &&
           Array.from({ length: params.pageSize || 6 }).map((_, i) => (
             <SkeletonCard key={i} />
@@ -74,7 +79,6 @@ function SectionRow({ title, params, seeMoreLink }) {
             return (
               <div
                 key={item.tconst}
-                className="movie-row__item"
                 onClick={() =>
                   navigate(path, {
                     state: { from: { label: "Home", path: "/" } },
@@ -91,8 +95,7 @@ function SectionRow({ title, params, seeMoreLink }) {
 }
 
 /* ---------------------------
-   Featured Carousel
-   MOVIES ONLY
+   Featured carousel
 ---------------------------- */
 function FeaturedCarousel() {
   const navigate = useNavigate();
@@ -100,7 +103,7 @@ function FeaturedCarousel() {
   const { list, loading } = useMoviesList({
     sort: "top-rated",
     type: "movie",
-    pageSize: 10,
+    pageSize: 8,
   });
 
   const itemsWithImages = list.filter((i) => getPoster(i));
@@ -114,7 +117,7 @@ function FeaturedCarousel() {
               style={{
                 height: "60vh",
                 minHeight: 420,
-                background: "#e5e5e5",
+                backgroundColor: "var(--bg-surface-muted)",
               }}
             />
           </Carousel.Item>
@@ -128,12 +131,12 @@ function FeaturedCarousel() {
             return (
               <Carousel.Item
                 key={item.tconst}
-                style={{ cursor: "pointer" }}
                 onClick={() =>
                   navigate(path, {
                     state: { from: { label: "Home", path: "/" } },
                   })
                 }
+                style={{ cursor: "pointer" }}
               >
                 <div
                   style={{
@@ -145,6 +148,7 @@ function FeaturedCarousel() {
                   }}
                 />
 
+                {/* Overlay for text readability */}
                 <div
                   style={{
                     position: "absolute",
@@ -154,9 +158,15 @@ function FeaturedCarousel() {
                   }}
                 />
 
-                <Carousel.Caption className="text-start">
-                  <h2 className="fw-bold">{item.primaryTitle}</h2>
-                  {item.startYear && <p>{item.startYear}</p>}
+                <Carousel.Caption className="text-start text-white">
+                  <h2 className="fw-bold">
+                    {item.primaryTitle}
+                  </h2>
+                  {item.startYear && (
+                    <p className="mb-0">
+                      {item.startYear}
+                    </p>
+                  )}
                 </Carousel.Caption>
               </Carousel.Item>
             );
@@ -167,14 +177,14 @@ function FeaturedCarousel() {
 }
 
 /* ---------------------------
-   Home Page
+   Page component
 ---------------------------- */
 export default function Home() {
   return (
     <>
       <FeaturedCarousel />
 
-      <Container fluid className="py-4 px-5">
+      <Container fluid className="px-4 px-lg-5">
         <SectionRow
           title="Top Action Movies"
           params={{ genre: "Action", sort: "top-rated", pageSize: 6 }}

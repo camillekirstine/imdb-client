@@ -5,6 +5,11 @@ import MovieCard from "../movies/MovieCard";
 import PersonCard from "../people/PersonCard";
 import ProfilePanel from "../ProfilePanel";
 
+/*
+  UserBookmarksPanel
+  - Shows all saved bookmarks
+*/
+
 export default function UserBookmarksPanel() {
   const { items, loading, error, removeBookmark } = useUserBookmarks();
 
@@ -17,20 +22,23 @@ export default function UserBookmarksPanel() {
   return (
     <ProfilePanel title="Bookmarks">
       {!items.length && (
-        <p className="text-muted">No bookmarks yet.</p>
+        <p className="text-muted">
+          You have not bookmarked anything yet.
+        </p>
       )}
 
       {titleBookmarks.length > 0 && (
         <>
-          <h6 className="mb-2">Titles</h6>
-          <div className="d-flex flex-wrap gap-3 mb-4">
+          <h6 className="mb-3">Titles</h6>
+
+          <div className="movie-grid mb-5">
             {titleBookmarks.map(({ movie, bookmarkId }) => (
-              <Card key={bookmarkId} style={{ width: 220 }}>
+              <Card key={bookmarkId}>
                 <MovieCard movie={movie} />
-                <Card.Body className="pt-2">
+                <Card.Body>
                   <Button
-                    variant="outline-danger"
                     size="sm"
+                    variant="outline-danger"
                     className="w-100"
                     onClick={() => removeBookmark(bookmarkId)}
                   >
@@ -45,15 +53,16 @@ export default function UserBookmarksPanel() {
 
       {personBookmarks.length > 0 && (
         <>
-          <h6 className="mb-2">People</h6>
-          <div className="d-flex flex-wrap gap-3">
+          <h6 className="mb-3">People</h6>
+
+          <div className="movie-grid">
             {personBookmarks.map(({ person, bookmarkId }) => (
-              <Card key={bookmarkId} style={{ width: 220 }}>
+              <Card key={bookmarkId}>
                 <PersonCard person={person} showJobBadge />
-                <Card.Body className="pt-2">
+                <Card.Body>
                   <Button
-                    variant="outline-danger"
                     size="sm"
+                    variant="outline-danger"
                     className="w-100"
                     onClick={() => removeBookmark(bookmarkId)}
                   >

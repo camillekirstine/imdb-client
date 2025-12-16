@@ -1,17 +1,18 @@
 import React from "react";
 import { Card, Badge } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { formatProfession, getPrimaryProfession } from "../../utils/formatLabel";
+import { getPrimaryProfession } from "../../utils/formatLabel";
 import SmartImage from "../common/SmartImage";
 
-function normalize(v) {
-  if (!v) return "";
-  if (Array.isArray(v)) return v.join(", ");
-  return String(v).replace(/[\[\]']+/g, "").trim();
+function normalize(value) {
+  if (!value) return "";
+  if (Array.isArray(value)) return value.join(", ");
+  return String(value).replace(/[\[\]']+/g, "").trim();
 }
 
 export default function PersonCard({
   person,
+  character,                 
   context = {},
   className = "",
   showJobBadge = false,
@@ -23,42 +24,63 @@ export default function PersonCard({
 
   const jobs = normalize(
     person?.allJobs ??
-    person?.job ??
-    person?.profession ??
-    person?.primaryProfession
+      person?.job ??
+      person?.profession ??
+      person?.primaryProfession
   );
 
   return (
     <Card
-      className={`h-100 ${className}`}
+      className={`movie-card ${className}`}
       role={id ? "button" : undefined}
-      onClick={id ? () => navigate(`/person/${id}`, { state: { from: context.from } }) : undefined}
-      style={{ cursor: id ? "pointer" : "default" }}
+      onClick={
+        id
+          ? () =>
+              navigate(`/person/${id}`, {
+                state: { from: context.from },
+              })
+          : undefined
+      }
     >
-      <div style={{ height: 180, position: "relative" }}>
+      <div className="movie-card__poster-wrapper">
         <SmartImage
           src={person?.profileUrl}
           tmdbPath={person?.profile_path}
           type="person"
           name={name}
           tmdbSize="w185"
-          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+          className="movie-card__poster"
         />
 
         {showJobBadge && jobs && (
-          <Badge bg="dark" className="position-absolute bottom-0 start-0 m-2">
+          <Badge bg="dark" className="movie-card__badge">
             {getPrimaryProfession(jobs)}
           </Badge>
         )}
       </div>
 
-      <Card.Body className="p-2">
-        <Card.Title style={{ fontSize: "0.95rem", marginBottom: 4 }}>
-          {name}
-        </Card.Title>
+      <Card.Body className="movie-card__body">
+        <div className="movie-card__title">{name}</div>
+
+        {/* Character / role */}
+        {character && (
+          <div
+            className="text-muted"
+            style={{
+              fontSize: "0.8rem",
+              lineHeight: 1.3,
+            }}
+          >
+            as {character}
+          </div>
+        )}
+
 
         {!showJobBadge && jobs && (
-          <div className="text-muted" style={{ fontSize: "0.8rem" }}>
+          <div
+            className="text-muted"
+            style={{ fontSize: "0.75rem" }}
+          >
             {jobs}
           </div>
         )}

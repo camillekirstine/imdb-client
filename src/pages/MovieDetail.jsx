@@ -7,8 +7,8 @@ import {
   Alert,
   Badge,
 } from "react-bootstrap";
-import MyActivityPanel from "../components/user/MyActivityPanel";
 
+import MyActivityPanel from "../components/user/MyActivityPanel";
 import useMovie from "../hooks/useMovie";
 import useCast from "../hooks/useCast";
 import useBookmarks from "../hooks/useBookmarks";
@@ -94,26 +94,23 @@ export default function MovieDetail() {
         }}
       />
 
-<MyActivityPanel
-  isLoggedIn={isLoggedIn}
-  isBookmarked={isBookmarked}
-  onBookmark={addBookmark}
-  onUnbookmark={removeBookmark}
-  rating={rating}
-  onRate={saveRating}
-  noteTarget={{ tconst: id }}
-/>
-
+      <MyActivityPanel
+        isLoggedIn={isLoggedIn}
+        isBookmarked={isBookmarked}
+        onBookmark={addBookmark}
+        onUnbookmark={removeBookmark}
+        rating={rating}
+        onRate={saveRating}
+        noteTarget={{ tconst: id }}
+      />
     </>
   );
 
   const footerContent = (
     <>
-      
-
       {cast.length > 0 && (
         <Card className="shadow-sm">
-          <Card.Header className="fw-semibold bg-white">
+          <Card.Header className="fw-semibold">
             Cast
           </Card.Header>
           <Card.Body>
@@ -122,10 +119,13 @@ export default function MovieDetail() {
                 <div className="col-6 col-md-4 col-lg-3" key={i}>
                   <PersonCard
                     person={m}
+                    character={m.allCharacters}
                     context={{
                       from: { label: title, path: `/movie/${id}` },
                     }}
                   />
+
+
                 </div>
               ))}
             </div>

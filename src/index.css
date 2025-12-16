@@ -1,109 +1,376 @@
+/* =====================================================
+   Global Design System
+   Dark mode is the default
+   Light mode is enabled via data-theme attribute
+===================================================== */
+
+/* ---------------------------
+   Base variables (shared)
+---------------------------- */
 :root {
-    font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-    line-height: 1.5;
-    font-weight: 400;
-  
-    color-scheme: light dark;
-    color: rgba(255, 255, 255, 0.87);
-    background-color: #242424;
-  
-    font-synthesis: none;
-    text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-  
-  a {
-    font-weight: 500;
-    color: #646cff;
-    text-decoration: inherit;
-  }
-  a:hover {
-    color: #535bf2;
-  }
-  
-  body {
-    margin: 0;
-    min-width: 320px;
-    min-height: 100vh;
-  }
-  
-  h1 {
-    font-size: 3.2em;
-    line-height: 1.1;
-  }
-  
-  button {
-    border-radius: 8px;
-    border: 1px solid transparent;
-    padding: 0.6em 1.2em;
-    font-size: 1em;
-    font-weight: 500;
-    font-family: inherit;
-    background-color: #1a1a1a;
-    cursor: pointer;
-    transition: border-color 0.25s;
-  }
-  button:hover {
-    border-color: #646cff;
-  }
-  button:focus,
-  button:focus-visible {
-    outline: 4px auto -webkit-focus-ring-color;
-  }
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
 
-  .hide-scrollbar {
-    scrollbar-width: none;          /* Firefox */
-    -ms-overflow-style: none;       /* IE & Edge */
-  }
-  
-  .hide-scrollbar::-webkit-scrollbar {
-    display: none;                  /* Chrome, Safari, Opera */
-  }
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
+  --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.2);
 
-  /* ===========================
-   Home – Movie Grid Layout
-=========================== */
+  --transition-fast: 0.15s ease;
+  --transition-base: 0.25s ease;
+}
 
+/* ---------------------------
+   Dark theme (default)
+---------------------------- */
+:root,
+:root[data-theme="dark"] {
+  /* Backgrounds */
+  --bg-app: #050f14;
+  --bg-surface: #12373a;
+  --bg-surface-muted: #1a4648;
+
+  /* Text */
+  --text-primary: #f1f5f5;
+  --text-muted: #b8cfcf;
+
+  /* Borders */
+  --border-subtle: rgba(255, 255, 255, 0.08);
+
+  /* Accents (palette-based) */
+  --accent-primary: #f58800;
+  --accent-secondary: #fbbc24;
+
+  /* Bootstrap overrides */
+  --bs-body-bg: var(--bg-app);
+  --bs-body-color: var(--text-primary);
+  --bs-border-color: var(--border-subtle);
+}
+
+/* ---------------------------
+   Light theme
+---------------------------- */
+:root[data-theme="light"] {
+  --bg-app: #f4f8f8;
+  --bg-surface: #ffffff;
+  --bg-surface-muted: #eef4f4;
+
+  --text-primary: #0e2a2b;
+  --text-muted: #5f7f80;
+
+  --border-subtle: rgba(0, 0, 0, 0.08);
+
+  --accent-primary: #f58800;
+  --accent-secondary: #fbbc24;
+
+  --bs-body-bg: var(--bg-app);
+  --bs-body-color: var(--text-primary);
+  --bs-border-color: var(--border-subtle);
+}
+
+/* ---------------------------
+   Global element styles
+---------------------------- */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+}
+
+/* Links */
+a {
+  color: var(--accent-primary);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--accent-secondary);
+}
+
+/* Headings */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* Muted text */
+.text-muted {
+  color: var(--text-muted) !important;
+}
+
+/* Navbar links */
+.navbar a,
+.navbar .nav-link {
+  color: var(--text-primary) !important;
+  opacity: 0.9;
+}
+
+.navbar a:hover,
+.navbar .nav-link:hover {
+  color: var(--accent-primary) !important;
+  opacity: 1;
+}
+
+/* Breadcrumbs */
+.breadcrumb {
+  background: transparent;
+  margin-bottom: 0;
+}
+
+.breadcrumb-item a {
+  color: var(--accent-primary);
+}
+
+.breadcrumb-item a:hover {
+  color: var(--accent-secondary);
+}
+
+.breadcrumb-item.active {
+  color: var(--text-muted);
+}
+
+.form-select {
+  background-color: var(--bg-surface-muted);
+  color: var(--text-primary);
+}
+
+.form-select option {
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+.form-select {
+  background-image: linear-gradient(45deg, transparent 50%, var(--text-muted) 50%),
+    linear-gradient(135deg, var(--text-muted) 50%, transparent 50%);
+  background-position:
+    calc(100% - 20px) calc(1em + 2px),
+    calc(100% - 15px) calc(1em + 2px);
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
+}
+
+/* =====================================================
+   Navbar logo
+===================================================== */
+
+.navbar-logo {
+  height: 50px;
+  width: auto;
+  max-width: 200spx;
+  object-fit: contain;
+  display: block;
+}
+
+/* Slightly larger on bigger screens */
+@media (min-width: 992px) {
+  .navbar-logo {
+    height: 32px;
+  }
+}
+
+
+
+
+/* =====================================================
+   Responsive Movie Grids
+===================================================== */
+
+/* Used on Browse and Search pages */
+.movie-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 1rem;
+  width: 100%;
+}
+
+/* Slightly larger cards on tablets */
+@media (min-width: 576px) {
+  .movie-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  }
+}
+
+/* Desktop spacing */
+@media (min-width: 992px) {
+  .movie-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1.25rem;
+  }
+}
+
+/* Home page horizontal rows */
 .movie-row {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 1.25rem;
-  width: 100%;
-}
-
-.movie-row__item {
-  width: 100%;
-  max-width: 180px;
-  height: 300px;
-  justify-self: center;
-  cursor: pointer;
-}
-
-/* ===========================
-   Browse – Movie Grid
-=========================== */
-
-.movie-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 1.25rem;
-  width: 100%;
-}
-
-.movie-grid__item {
-  max-width: 180px;
-  justify-self: center;
+  gap: 1rem;
 }
 
 
-.movie-grid__rating {
-  font-size: 0.85rem;
-  color: #6c757d;
-  padding-top: 0.25rem;
+
+@media (min-width: 768px) {
+  .movie-row {
+    grid-auto-columns: 180px;
+  }
+}
+
+
+/* ---------------------------
+   Card styling (global)
+---------------------------- */
+.card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+
+.card-header {
+  background-color: transparent;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+/* =====================================================
+   Pagination theming
+===================================================== */
+
+.pagination {
+  gap: 0.25rem;
+}
+
+.page-item .page-link {
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  min-width: 36px;
   text-align: center;
+  transition: background-color var(--transition-fast),
+    color var(--transition-fast),
+    border-color var(--transition-fast);
 }
 
+/* Hover */
+.page-item .page-link:hover {
+  background-color: var(--bg-surface-muted);
+  color: var(--accent-primary);
+}
+
+/* Active page */
+.page-item.active .page-link {
+  background-color: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: #000;
+  font-weight: 600;
+}
+
+/* Disabled */
+.page-item.disabled .page-link {
+  background-color: transparent;
+  color: var(--text-muted);
+  border-color: var(--border-subtle);
+  opacity: 0.6;
+}
+
+
+/* ---------------------------
+   Buttons
+---------------------------- */
+.btn-primary {
+  background-color: var(--accent-primary);
+  border-color: var(--accent-primary);
+}
+
+.btn-primary:hover {
+  background-color: var(--accent-secondary);
+  border-color: var(--accent-secondary);
+}
+
+.btn-outline-primary {
+  color: var(--accent-primary);
+  border-color: var(--accent-primary);
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--accent-primary);
+  color: #000;
+}
+
+/* =====================================================
+   Title type badge theming
+===================================================== */
+
+.badge {
+  font-weight: 500;
+  border-radius: 999px;
+  padding: 0.35em 0.6em;
+}
+
+/* Movie */
+.badge.bg-primary {
+  background-color: var(--accent-primary) !important;
+  color: #000 !important;
+}
+
+/* Series */
+.badge.bg-success {
+  background-color: var(--bg-surface-muted) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-subtle);
+}
+
+/* Mini-series */
+.badge.bg-info {
+  background-color: var(--bg-surface-muted) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-subtle);
+}
+
+/* Episode */
+.badge.bg-warning {
+  background-color: var(--accent-secondary) !important;
+  color: #000 !important;
+}
+
+/* Documentary */
+.badge.bg-dark {
+  background-color: var(--bg-surface) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-subtle);
+}
+
+/* Fallback */
+.badge.bg-secondary {
+  background-color: var(--bg-surface-muted) !important;
+  color: var(--text-muted) !important;
+  border: 1px solid var(--border-subtle);
+}
+
+
+/* ---------------------------
+   Inputs
+---------------------------- */
+.form-control,
+.form-select {
+  background-color: var(--bg-surface-muted);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+}
+
+.form-control::placeholder {
+  color: var(--text-muted);
+}
+
+/* ---------------------------
+   Utility helpers
+---------------------------- */
 .clamp-3 {
   display: -webkit-box;
   -webkit-line-clamp: 3;
@@ -111,36 +378,25 @@
   overflow: hidden;
 }
 
-
-.dropdown-animate {
-  animation: fadeSlideDown 0.15s ease-out;
-  transform-origin: top right;
+/* Hide scrollbars (used in carousels) */
+.hide-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
-@keyframes fadeSlideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
-
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+.carousel-item::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.75),
+    rgba(0, 0, 0, 0.25),
+    rgba(0, 0, 0, 0)
+  );
 }
 
-  

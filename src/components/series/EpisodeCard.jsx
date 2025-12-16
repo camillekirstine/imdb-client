@@ -9,27 +9,32 @@ export default function EpisodeCard({ episode, context }) {
 
   return (
     <Card
-      className="h-100"
+      className="movie-card"
       role="button"
       onClick={() =>
-        navigate(`/episode/${episode.tconst}`, { state: { from: context?.from } })
+        navigate(`/episode/${episode.tconst}`, {
+          state: { from: context?.from },
+        })
       }
     >
-      <SmartImage
-        src={episode.posterUrl}
-        type="title"
-        name={episode.episodeTitle}
-        tmdbSize="w342"
-        style={{ height: 200, objectFit: "cover" }}
-      />
+      <div className="movie-card__poster-wrapper">
+        <SmartImage
+          src={episode.posterUrl}
+          type="title"
+          name={episode.episodeTitle}
+          tmdbSize="w342"
+          className="movie-card__poster"
+        />
+      </div>
 
-      <Card.Body>
+      <Card.Body className="movie-card__body">
         <Badge bg="secondary" className="mb-2">
           S{episode.seasonNumber} · E{episode.episodeNumber}
         </Badge>
-        <Card.Title style={{ fontSize: "1rem" }}>
+
+        <div className="movie-card__title">
           {episode.episodeTitle}
-        </Card.Title>
+        </div>
       </Card.Body>
     </Card>
   );

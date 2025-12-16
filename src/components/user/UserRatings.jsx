@@ -4,6 +4,12 @@ import { Spinner, Alert, Card, Badge } from "react-bootstrap";
 import MovieCard from "../movies/MovieCard";
 import ProfilePanel from "../ProfilePanel";
 
+/*
+  UserRatingsPanel
+  - Displays ratings in a simple grid
+  - Rating badge is visually secondary to the title
+*/
+
 export default function UserRatingsPanel() {
   const { items, loading, error } = useUserRatings();
 
@@ -13,12 +19,14 @@ export default function UserRatingsPanel() {
   return (
     <ProfilePanel title="Ratings">
       {!items.length && (
-        <p className="text-muted">No ratings yet.</p>
+        <p className="text-muted">
+          You have not rated any titles yet.
+        </p>
       )}
 
-      <div className="d-flex flex-wrap gap-3">
+      <div className="movie-grid">
         {items.map((rating) => (
-          <Card key={rating.ratingId} style={{ width: 220 }}>
+          <Card key={rating.ratingId}>
             <MovieCard
               movie={{
                 tconst: rating.tconst,
@@ -27,7 +35,7 @@ export default function UserRatingsPanel() {
                 posterUrl: rating.posterUrl,
               }}
             />
-            <Card.Body className="pt-2 text-center">
+            <Card.Body className="text-center">
               <Badge bg="primary">
                 My rating: {rating.rating} / 10
               </Badge>

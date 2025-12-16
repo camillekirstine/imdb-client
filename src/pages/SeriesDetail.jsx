@@ -23,7 +23,6 @@ import InfoCard from "../components/common/InfoCard";
 import SmartImage from "../components/common/SmartImage";
 import MyActivityPanel from "../components/user/MyActivityPanel";
 
-
 export default function SeriesDetail() {
   const { id } = useParams();
   const location = useLocation();
@@ -122,7 +121,6 @@ export default function SeriesDetail() {
         onRate={saveRating}
         noteTarget={{ tconst: id }}
       />
-
     </>
   );
 
@@ -140,11 +138,9 @@ export default function SeriesDetail() {
 
   const footerContent = (
     <>
-      
-
       {cast.length > 0 && (
         <Card className="shadow-sm">
-          <Card.Header className="fw-semibold bg-white">
+          <Card.Header className="fw-semibold">
             Cast
           </Card.Header>
           <Card.Body>
@@ -153,6 +149,7 @@ export default function SeriesDetail() {
                 <div className="col-6 col-md-4 col-lg-3" key={i}>
                   <PersonCard
                     person={m}
+                    character={m.allCharacters}
                     context={{
                       from: {
                         label: title,

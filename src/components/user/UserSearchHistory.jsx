@@ -1,8 +1,15 @@
 import React, { useState } from "react";
-import { Spinner, Alert, Row, Col, Pagination } from "react-bootstrap";
+import { Spinner, Alert, Row, Col, Pagination, Card } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import useUserSearchHistory from "../../hooks/useUserSearchHistory";
 import ProfilePanel from "../ProfilePanel";
+
+/*
+  UserSearchHistoryPanel
+  - Simple, log-like presentation
+  - Clickable rows
+  - Pagination kept minimal
+*/
 
 const PAGE_SIZE = 20;
 
@@ -26,24 +33,26 @@ export default function UserSearchHistoryPanel() {
         </p>
       )}
 
-      {history.length > 0 && (
-        <Row xs={1} md={2} lg={3} className="g-3">
-          {history.map(item => (
-            <Col key={item.tconst}>
-              <div
-                className="border rounded p-3 h-100"
-                style={{ cursor: "pointer" }}
-                onClick={() => navigate(`/movie/${item.tconst}`)}
-              >
+      <Row xs={1} md={2} className="g-3">
+        {history.map(item => (
+          <Col key={item.tconst}>
+            <Card
+              role="button"
+              className="h-100"
+              onClick={() =>
+                navigate(`/movie/${item.tconst}`)
+              }
+            >
+              <Card.Body>
                 <strong>{item.title}</strong>
-                <div className="text-muted small">
+                <div className="text-muted small mt-1">
                   {new Date(item.visitedAt).toLocaleString()}
                 </div>
-              </div>
-            </Col>
-          ))}
-        </Row>
-      )}
+              </Card.Body>
+            </Card>
+          </Col>
+        ))}
+      </Row>
 
       {totalPages > 1 && (
         <div className="d-flex justify-content-center mt-4">

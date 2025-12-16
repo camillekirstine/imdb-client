@@ -8,10 +8,10 @@ import SmartImage from "../common/SmartImage";
 
 import "./MovieCard.css";
 
+
 export default function MovieCard({ movie, rating }) {
   const navigate = useNavigate();
   const route = getCardPath(movie);
-  const isClickable = Boolean(route);
 
   const title =
     movie?.primaryTitle ??
@@ -30,9 +30,12 @@ export default function MovieCard({ movie, rating }) {
   return (
     <Card
       className="movie-card"
-      role={isClickable ? "button" : undefined}
-      tabIndex={isClickable ? 0 : undefined}
-      onClick={isClickable ? () => navigate(route, { state: { from: { label: title } } }) : undefined}
+      role="button"
+      onClick={() =>
+        navigate(route, {
+          state: { from: { label: title } },
+        })
+      }
     >
       <div className="movie-card__poster-wrapper">
         <SmartImage

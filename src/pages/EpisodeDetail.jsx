@@ -12,7 +12,6 @@ import DetailLayout from "../components/layout/DetailLayout";
 import InfoCard from "../components/common/InfoCard";
 import SmartImage from "../components/common/SmartImage";
 
-
 export default function EpisodeDetail() {
   const { id } = useParams();
   const location = useLocation();
@@ -88,11 +87,9 @@ export default function EpisodeDetail() {
 
   const footerContent = (
     <>
-    
-
       {cast.length > 0 && (
         <Card className="shadow-sm">
-          <Card.Header className="fw-semibold bg-white">
+          <Card.Header className="fw-semibold">
             Cast
           </Card.Header>
           <Card.Body>
@@ -101,6 +98,7 @@ export default function EpisodeDetail() {
                 <div className="col-6 col-md-4 col-lg-3" key={i}>
                   <PersonCard
                     person={m}
+                    character={m.allCharacters}
                     context={{
                       from: { label: title, path: `/episode/${id}` },
                     }}

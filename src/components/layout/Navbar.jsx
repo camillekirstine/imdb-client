@@ -10,37 +10,50 @@ import {
 import { LinkContainer } from "react-router-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { useTheme } from "../../context/ThemeContext";
 import { API_ORIGIN } from "../../config/apiConfig";
 
 export default function AppNavbar() {
   const [searchQuery, setSearchQuery] = useState("");
   const { isLoggedIn, logout, user } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
-  const handleSearch = (e) => {
+  function handleSearch(e) {
     e.preventDefault();
     const q = searchQuery.trim();
     if (!q) return;
     navigate(`/search?query=${encodeURIComponent(q)}`);
-  };
+  }
 
-  const goToProfile = () => navigate("/user");
-
-  const handleLogout = () => {
+  function handleLogout() {
     logout();
     navigate("/user/login");
-  };
+  }
 
   return (
-    <Navbar bg="light" expand="lg">
+    <Navbar
+      expand="lg"
+      style={{
+        backgroundColor: "var(--bg-surface)",
+        borderBottom: "1px solid var(--border-subtle)",
+      }}
+    >
       <Container>
         <LinkContainer to="/">
-          <Navbar.Brand>MovieApp</Navbar.Brand>
+        <Navbar.Brand className="d-flex align-items-center">
+          <img
+            src="/assets/logo.png"
+            alt="CIT02 Movie DB"
+            className="navbar-logo"
+          />
+        </Navbar.Brand> 
+
         </LinkContainer>
 
-        <Navbar.Toggle aria-controls="basic-navbar-nav" />
+        <Navbar.Toggle />
 
-        <Navbar.Collapse id="basic-navbar-nav">
+        <Navbar.Collapse>
           <Nav className="me-auto">
             <LinkContainer to="/browse">
               <Nav.Link>Browse</Nav.Link>
@@ -52,45 +65,35 @@ export default function AppNavbar() {
             <Form.Control
               type="search"
               placeholder="Search movies..."
-              className="me-2"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
-            <Button variant="outline-success" type="submit">
-              Search
-            </Button>
           </Form>
 
-          {/* User avatar dropdown */}
+          {/* Theme toggle */}
+          <Button
+            variant="outline-secondary"
+            className="me-3"
+            onClick={toggleTheme}
+          >
+            {theme === "dark" ? "Light mode" : "Dark mode"}
+          </Button>
+
+          {/* User menu */}
           <Nav>
             {!isLoggedIn ? (
-              <Nav.Link
-                onClick={() => navigate("/user/login")}
-                style={{ cursor: "pointer" }}
-                aria-label="Log in"
-              >
-                <img
-                  src={`${API_ORIGIN}/uploads/avatars/default.png`}
-                  alt="User"
-                  width={32}
-                  height={32}
-                  className="rounded-circle"
-                />
+              <Nav.Link onClick={() => navigate("/user/login")}>
+                Log in
               </Nav.Link>
             ) : (
               <Dropdown align="end">
-                <Dropdown.Toggle
-                  variant="link"
-                  id="user-dropdown"
-                  className="d-flex align-items-center text-decoration-none p-0"
-                >
+                <Dropdown.Toggle variant="link" className="p-0">
                   <img
                     src={`${API_ORIGIN}${user.profileImageUrl}`}
-                    alt="User avatar"
+                    alt="User"
                     width={32}
                     height={32}
                     className="rounded-circle"
-                    style={{ objectFit: "cover" }}
                     onError={(e) => {
                       e.currentTarget.src =
                         `${API_ORIGIN}/uploads/avatars/default.png`;
@@ -98,17 +101,12 @@ export default function AppNavbar() {
                   />
                 </Dropdown.Toggle>
 
-                <Dropdown.Menu className="dropdown-animate">
-                  <Dropdown.Header className="fw-semibold">
-                    {user.username}
-                  </Dropdown.Header>
-
-                  <Dropdown.Item onClick={goToProfile}>
+                <Dropdown.Menu>
+                  <Dropdown.Header>{user.username}</Dropdown.Header>
+                  <Dropdown.Item onClick={() => navigate("/user")}>
                     Profile
                   </Dropdown.Item>
-
                   <Dropdown.Divider />
-
                   <Dropdown.Item
                     className="text-danger"
                     onClick={handleLogout}

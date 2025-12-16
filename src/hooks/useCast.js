@@ -21,7 +21,7 @@ export default function useCast(id) {
 
     async function load() {
       try {
-        // ✅ This endpoint works for movies, series, and episodes
+        // This endpoint works for movies, series, and episodes
         const rawCast = await movieService.getCast(id);
 
         // --------------------

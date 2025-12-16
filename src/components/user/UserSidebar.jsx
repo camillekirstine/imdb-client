@@ -2,19 +2,29 @@ import { Card, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { API_ORIGIN } from "../../config/apiConfig";
 
+/*
+  UserSidebar
+  - Displays user identity and quick actions
+*/
+
 export default function UserSidebar({ profile }) {
   const navigate = useNavigate();
 
   return (
-    <Card className="text-center">
-      <Card.Body>
+    <Card>
+      <Card.Body className="text-center">
         <img
           src={`${API_ORIGIN}${profile.profileImageUrl}`}
           alt="Profile"
           className="rounded-circle mb-3"
-          style={{ width: 120, height: 120, objectFit: "cover" }}
+          style={{
+            width: 120,
+            height: 120,
+            objectFit: "cover",
+          }}
           onError={(e) => {
-            e.currentTarget.src = `${API_ORIGIN}/uploads/avatars/default.png`;
+            e.currentTarget.src =
+              `${API_ORIGIN}/uploads/avatars/default.png`;
           }}
         />
 
@@ -26,7 +36,7 @@ export default function UserSidebar({ profile }) {
           @{profile.username}
         </div>
 
-        <div className="small text-muted mb-3">
+        <div className="small text-muted mb-4">
           {profile.email}
         </div>
 

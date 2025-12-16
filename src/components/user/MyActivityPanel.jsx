@@ -3,6 +3,11 @@ import { BookmarkPlus, BookmarkCheckFill } from "react-bootstrap-icons";
 import { useState } from "react";
 import NoteModal from "../notes/NoteModal";
 
+/*
+  MyActivityPanel
+  - User interaction area on detail pages
+*/
+
 export default function MyActivityPanel({
   isLoggedIn,
   isBookmarked,
@@ -33,13 +38,16 @@ export default function MyActivityPanel({
   return (
     <>
       <Card className="mt-3 shadow-sm">
-        <Card.Header className="fw-semibold bg-white">
+        <Card.Header
+          className="fw-semibold"
+          style={{ background: "transparent" }}
+        >
           My activity
         </Card.Header>
 
         <Card.Body className="d-grid gap-2">
           <Button
-            variant={isBookmarked ? "success" : "outline-primary"}
+            variant={isBookmarked ? "primary" : "outline-primary"}
             onClick={isBookmarked ? onUnbookmark : onBookmark}
           >
             {isBookmarked ? (
@@ -53,11 +61,15 @@ export default function MyActivityPanel({
           {onRate && (
             <Form.Select
               value={rating ?? ""}
-              onChange={(e) => onRate(Number(e.target.value))}
+              onChange={(e) =>
+                onRate(Number(e.target.value))
+              }
             >
               <option value="">Rate</option>
               {[1,2,3,4,5,6,7,8,9,10].map(n => (
-                <option key={n} value={n}>{n}</option>
+                <option key={n} value={n}>
+                  {n}
+                </option>
               ))}
             </Form.Select>
           )}

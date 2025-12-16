@@ -10,22 +10,17 @@ import {
   Button,
   Form,
   ButtonGroup,
-  Collapse,
+  Card,
 } from "react-bootstrap";
 
 import MovieCard from "../components/movies/MovieCard";
-import { getCardPath, buildPageButtons } from "./listPageHelpers";
+import { buildPageButtons } from "./listPageHelpers";
 
-/* ---------------------------
-   Debug flag (build-time)
----------------------------- */
-const ENABLE_DEBUG =
-  import.meta?.env?.MODE === "development" &&
-  import.meta?.env?.VITE_SHOW_DEBUG === "true";
+/*
+  Browse
+  - Main discovery page
+*/
 
-/* ---------------------------
-   Constants
----------------------------- */
 const GENRES = [
   "All", "Fantasy", "Game-Show", "Adventure", "Documentary", "Family",
   "Action", "Animation", "Music", "Reality-TV", "Sport", "Comedy",
@@ -51,7 +46,6 @@ export default function Browse({ defaultType = "all" }) {
   const [sort, setSort] = useState(
     search.get("sort") || "default"
   );
-  const [showRaw, setShowRaw] = useState(false);
 
   const params = {
     page,
@@ -61,13 +55,11 @@ export default function Browse({ defaultType = "all" }) {
     sort: sort !== "default" ? sort : undefined,
   };
 
-  const { list, loading, totalPages, total } = useMoviesList(params);
-
-  const pageStart = (page - 1) * params.pageSize + 1;
-  const pageEnd = pageStart + list.length - 1;
+  const { list, loading, totalPages, total } =
+    useMoviesList(params);
 
   /* ---------------------------
-     Sync state to URL
+     Sync filters to URL
   ---------------------------- */
   useEffect(() => {
     const qs = new URLSearchParams();
@@ -79,9 +71,6 @@ export default function Browse({ defaultType = "all" }) {
     navigate({ search: `?${qs.toString()}` }, { replace: true });
   }, [page, contentType, genre, sort, navigate]);
 
-  /* ---------------------------
-     Reset page on filter change
-  ---------------------------- */
   useEffect(() => {
     setPage(1);
   }, [contentType, genre, sort]);
@@ -91,51 +80,56 @@ export default function Browse({ defaultType = "all" }) {
       ? "Movies"
       : contentType === "series"
       ? "Series"
-      : "All Titles";
+      : "All titles";
 
   return (
-    <div className="d-flex flex-column min-vh-100">
-      <Container fluid className="py-4 px-5 flex-grow-1">
-        {/* Header */}
-        <div className="mb-3">
-          <h2 className="mb-1">{title}</h2>
+    <Container fluid className="px-4 px-lg-5 py-4">
+      {/* Header */}
+      <div className="mb-4">
+        <h2 className="mb-1">{title}</h2>
+        {!loading && (
+          <div className="text-muted">
+            Showing {list.length} of {total ?? "unknown"}
+          </div>
+        )}
+      </div>
 
-          {!loading && (
-            <div className="text-muted">
-              <strong>Page {page}</strong> of{" "}
-              <strong>{totalPages ?? "Unknown"}</strong> — Showing{" "}
-              <strong>{pageStart}–{pageEnd}</strong> of{" "}
-              <strong>{total ?? "Unknown"}</strong>
-            </div>
-          )}
-        </div>
+      {/* Filters */}
+      <Card className="mb-4">
+        <Card.Body className="d-flex flex-wrap gap-4 align-items-end">
+        <Form.Group className="d-flex flex-column">
+  <Form.Label>Type</Form.Label>
 
-        {/* Filters */}
-        <div className="d-flex flex-wrap gap-4 mb-4 align-items-end">
-          <ButtonGroup>
-            <Button
-              variant={contentType === "all" ? "primary" : "outline-primary"}
-              onClick={() => setContentType("all")}
-            >
-              All
-            </Button>
-            <Button
-              variant={contentType === "movie" ? "primary" : "outline-primary"}
-              onClick={() => setContentType("movie")}
-            >
-              Movies
-            </Button>
-            <Button
-              variant={contentType === "series" ? "primary" : "outline-primary"}
-              onClick={() => setContentType("series")}
-            >
-              Series
-            </Button>
-          </ButtonGroup>
+  <ButtonGroup>
+    <Button
+      variant={contentType === "all" ? "primary" : "outline-primary"}
+      onClick={() => setContentType("all")}
+    >
+      All
+    </Button>
+    <Button
+      variant={contentType === "movie" ? "primary" : "outline-primary"}
+      onClick={() => setContentType("movie")}
+    >
+      Movies
+    </Button>
+    <Button
+      variant={contentType === "series" ? "primary" : "outline-primary"}
+      onClick={() => setContentType("series")}
+    >
+      Series
+    </Button>
+  </ButtonGroup>
+</Form.Group>
+
+          
 
           <Form.Group>
             <Form.Label>Genre</Form.Label>
-            <Form.Select value={genre} onChange={(e) => setGenre(e.target.value)}>
+            <Form.Select
+              value={genre}
+              onChange={(e) => setGenre(e.target.value)}
+            >
               {GENRES.map((g) => (
                 <option key={g}>{g}</option>
               ))}
@@ -144,97 +138,75 @@ export default function Browse({ defaultType = "all" }) {
 
           <Form.Group>
             <Form.Label>Sort</Form.Label>
-            <Form.Select value={sort} onChange={(e) => setSort(e.target.value)}>
+            <Form.Select
+              value={sort}
+              onChange={(e) => setSort(e.target.value)}
+            >
               <option value="default">Default</option>
-              <option value="top-rated">Top Rated</option>
+              <option value="top-rated">Top rated</option>
               <option value="newest">Newest</option>
               <option value="oldest">Oldest</option>
             </Form.Select>
           </Form.Group>
+        </Card.Body>
+      </Card>
 
-          {ENABLE_DEBUG && (
-            <Button
-              size="sm"
-              variant="secondary"
-              onClick={() => setShowRaw((s) => !s)}
-            >
-              Raw Debug
-            </Button>
-          )}
+      {/* Results */}
+      {loading && (
+        <div className="text-center py-5">
+          <Spinner />
         </div>
+      )}
 
-        {/* Loading */}
-        {loading && (
-          <div className="text-center py-5">
-            <Spinner animation="border" />
+      {!loading && list.length === 0 && (
+        <Alert variant="info">
+          No results found.
+        </Alert>
+      )}
+
+      {!loading && list.length > 0 && (
+        <>
+          <div className="movie-grid">
+            {list.map((item) => (
+              <MovieCard
+                key={item.tconst ?? item.id}
+                movie={item}
+              />
+            ))}
           </div>
-        )}
 
-        {/* Empty */}
-        {!loading && list.length === 0 && (
-          <Alert variant="info">No results found.</Alert>
-        )}
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="d-flex justify-content-center mt-4">
+              <Pagination>
+                <Pagination.Prev
+                  disabled={page <= 1}
+                  onClick={() => setPage(page - 1)}
+                />
 
-        {/* Debug */}
-        {ENABLE_DEBUG && (
-          <Collapse in={showRaw}>
-            <pre className="p-2 bg-light" style={{ maxHeight: 300, overflow: "auto" }}>
-              {JSON.stringify({ params, preview: list.slice(0, 3) }, null, 2)}
-            </pre>
-          </Collapse>
-        )}
+                {buildPageButtons(page, totalPages).map((p, i) =>
+                  p === "ellipsis" ? (
+                    <Pagination.Ellipsis key={i} disabled />
+                  ) : (
+                    <Pagination.Item
+                      key={p}
+                      active={p === page}
+                      onClick={() => setPage(p)}
+                    >
+                      {p}
+                    </Pagination.Item>
+                  )
+                )}
 
-        {/* GRID */}
-        <div className="movie-grid">
-  {list.map((item) => {
-    const id = item.tconst ?? item.id;
-    const avg =
-      item.AverageRating ??
-      item.averageRating ??
-      item._avg ??
-      0;
-
-    return (
-      <div key={id} className="movie-grid__item">
-        <MovieCard movie={item} rating={avg} />
-      </div>
-    );
-  })}
-</div>
-
-        {/* Pagination */}
-        <div className="d-flex flex-column align-items-center mt-4">
-          <Pagination>
-            <Pagination.Prev
-              disabled={page <= 1}
-              onClick={() => setPage(page - 1)}
-            />
-
-            {buildPageButtons(page, totalPages).map((p, i) =>
-              p === "ellipsis" ? (
-                <Pagination.Ellipsis key={i} disabled />
-              ) : (
-                <Pagination.Item
-                  key={p}
-                  active={p === page}
-                  onClick={() => setPage(p)}
-                >
-                  {p}
-                </Pagination.Item>
-              )
-            )}
-
-            <Pagination.Next
-              disabled={
-                totalPages
-                  ? page >= totalPages
-                  : list.length < params.pageSize
-              }
-              onClick={() => setPage(page + 1)}
-            />
-          </Pagination>
-        </div>
-      </Container>
-    </div>
+                <Pagination.Next
+                  disabled={page >= totalPages}
+                  onClick={() => setPage(page + 1)}
+                />
+              </Pagination>
+            </div>
+          )}
+        </>
+      )}
+    </Container>
   );
 }

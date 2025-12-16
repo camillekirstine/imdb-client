@@ -1,6 +1,11 @@
 import React from "react";
 import { Row, Col, Card } from "react-bootstrap";
 
+/*
+  DetailLayout
+  - Shared layout for movie, series, episode, and person pages
+*/
+
 export default function DetailLayout({
   breadcrumbs,
   title,
@@ -11,9 +16,17 @@ export default function DetailLayout({
 }) {
   return (
     <>
-      {breadcrumbs && <div className="mb-3">{breadcrumbs}</div>}
+      {breadcrumbs && (
+        <div className="mb-3">
+          {breadcrumbs}
+        </div>
+      )}
 
-      {title && <h1 className="mb-4">{title}</h1>}
+      {title && (
+        <div className="mb-4">
+          <h1 className="mb-0">{title}</h1>
+        </div>
+      )}
 
       {/* Poster + About */}
       <Row className="g-4 mb-5">
@@ -26,14 +39,16 @@ export default function DetailLayout({
         </Col>
       </Row>
 
-      {/* MAIN CONTENT (Episodes etc.) */}
+      {/* Main content (episodes, notes, etc.) */}
       {children && (
         <Card className="mb-5 shadow-sm">
-          <Card.Body>{children}</Card.Body>
+          <Card.Body>
+            {children}
+          </Card.Body>
         </Card>
       )}
 
-      {/* FOOTER CONTENT (Cast, Photos, Credits) */}
+      {/* Footer sections (cast, credits, photos) */}
       {footerContent && (
         <div className="mt-5">
           {footerContent}
