@@ -14,7 +14,7 @@ import {
 } from "react-bootstrap";
 
 import MovieCard from "../components/movies/MovieCard";
-import { buildPageButtons } from "./listPageHelpers";
+import { buildPageButtons } from "./ListPageHelpers";
 
 /*
   Browse
