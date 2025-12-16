@@ -10,7 +10,7 @@ import {
   Spinner,
   Alert,
 } from "react-bootstrap";
-import UserSidebar from "./UserSideBar";
+import UserSidebar from "./UserSidebar";
 
 export default function UserProfile() {
   const { logout } = useAuth();
